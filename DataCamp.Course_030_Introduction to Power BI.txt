@@ -1,0 +1,741 @@
+######################################################################
+######################################################################
+######################################################################
+
+# COURSE 030_Introduction to Power BI
+
+######################################################################
+######################################################################
+######################################################################
+
+######## Getting Started with Power BI (Module 01-030)
+######################################################################
+
+video
+
+Why Power BI?
+Leading data visualization tool according to
+Gartner
+Over 97% of Fortune 500 companies use
+Power BI
+Over 6 million customers
+
+Power BI Components
+Power BI Desktop
+Desktop version
+Data analysis and report creation tool
+Includes the Power Query Editor
+100% free
+Power BI service
+Cloud-based version
+Light report editing
+Share and distribute reports
+
+ver video 2
+
+#---------------------------------------------------------------------
+
+Loading existing reports
+
+Let's get you started! On the right, we provide you with your very own virtual machine running Power BI. It may take a few minutes to load, but it only needs to be set up once.
+
+Before you start loading data and creating visualizations, it's important you know how to load existing reports. If at any point in the course you lose progress or get stuck, you can load the corresponding report to re-initialize. In this exercise, we'll take a look at a report you will be able to create by the end of this chapter.
+
+    Under File menu in Power BI, open the report called 1_10_Making_Maps.pbix, from the Exercises folder on the desktop.
+    Answer the question below using the text field provided.
+
+You can enlarge this window by clicking on the full-screen button in the bottom right corner. Additionally, you can collapse the exercise pane to be able to see more of the virtual machine on the right.
+
+If needed, you can also make the canvas area bigger by expanding and collapsing the Filters, Visualizations, and Fields panes by selecting the arrows at the tops of the panes. Collapsing the panes provides more space on the canvas to build cool visualizations.
+
+#---------------------------------------------------------------------
+
+Your first visualization
+
+Time to start loading your own data! Begin by opening the 1_1_Your_First_Viz.pbix from the Exercises folder on the desktop. Make sure to close any reports from earlier before doing so, as having too many reports open will decrease the speed of the machine. You can do this by clicking on the close icon in the top right.
+
+In this report, FactSale.csv has been loaded and there is already a bar chart with the quantity of items ever sold by Wide World Importers (WWI). This would be more meaningful if we segmented the graph into years.
+
+    Load the DimDate.csv from the Datasets/WWI folder on the desktop. Make sure to use the file in the WWI folder.
+    In the Model view, create a relationship betweenFactSale's Invoice Date Key and DimDate's Date.
+    In the Report view, select the bar chart and then select Calendar Year from DimDate in the Fields pane.
+    Make sure to use Calendar Year instead of Calendar Year Label. You can expand the Fields pane by dragging its left-hand border.
+    In the Visualizations pane, drag Calendar Year to Axis rather than Value.
+
+Note that you can use the undo-button in the top left corner to undo any edits you made.
+
+Based on your resulting visualization, which statement is true?
+
+#---------------------------------------------------------------------
+Add a card
+
+Let's add some more to your report. We found the quantity of items sold per year. Now, you want to know more about the profit made over the years. A card is a great choice because it's simple and adds some elegant interactivity.
+
+If you lost progress, close any open reports and load 1_2_Add_a_Card.pbix from the Exercises folder on the desktop.
+
+    In the Report view, deselect any visuals you have selected by clicking a blank area of the canvas.
+    Select the Profit field from FactSale.
+    Choose the card visualization.
+
+Now, you have two visualizations in your report. Arrange and resize them to your liking! Note that you can use the Search function in the Fields pane to easily locate columns.
+
+Select the year 2014 bar. How does the profit card change?
+
+#---------------------------------------------------------------------
+Another video
+Slicers and Tables
+#---------------------------------------------------------------------
+
+Slicers
+
+Let's continue building on your last report. If you lost progress, close any open reports and load 1_3_Slicers.pbix from the Exercises folder on the desktop.
+
+We have the fields Quantity and Profit in our report. It would be interesting to analyze how each Wide World Importers (WWI) salesperson has contributed to the quantity of items sold and the profit generated. To do this, we'll add a new dimension table and a slicer.
+
+    Load the Excel file DimEmployee.xlsx from Datasets/WWI folder on the desktop.
+    Create a relationship between FactSale's Salesperson Key and DimEmployee's Employee Key.
+    In the Report view, add a slicer.
+    Add the Employee field to the slicer.
+
+#---------------------------------------------------------------------
+More columns
+
+Wide World Importers sells two types of products: chilled and dry. This is recorded in the database because chilled products require a different kind of packaging. To compare these product types, you will add the quantity of products sold that are chilled or dry to the bar chart.
+
+If you lost progress, close any open reports and load 1_4_More_Columns.pbix from the Exercises folder on the desktop.
+
+    Select the Quantity of Items Sold bar chart.
+    Select Total Dry Items and Total Chiller Items in the Fields pane.
+
+Based on the result, which statement is true about Wide World Importers?
+
+
+#---------------------------------------------------------------------
+Table
+
+Let's add a table to our report with the details of sales transactions. With the interactivity of Power BI, this will allow us to see examples of sales based on our selection.
+
+If you lost progress, close any open reports and load 1_5_Table.pbix from the Exercises folder on the desktop.
+
+    De-select any selected visualization and add a table.
+    Add the dimension fields to the table: Employee and Calendar Month Label.
+    Add the fact fields to the table: Description, Quantity, Total Including Tax, Profit.
+    Add a text box to clearly title the report "Sales Data" and arrange the report to your liking.
+    Change the name of the page tab to contain the same name as the title.
+
+#---------------------------------------------------------------------
+
+Video 
+Transforming data
+
+Transforming data
+Dataset may contain:
+Columns you don't need
+Inconvenient and inconsistent formatting
+Extra characters
+Blank rows
+Cleaning data
+
+***********use the Power Query Editor while loading the data
+
+Fasforeward another instrunctional video
+
+#---------------------------------------------------------------------
+
+Transform before load
+
+Raw data usually doesn't arrive in the perfect form when you account for things like human errors, bugs, and file conversion. Power BI accounts for this with the Power Query Editor which allows you to transform data before loading it. In this exercise, you will load another dimension called DimCustomer, except unlike the others, this file will need to be edited prior to loading.
+
+If you lost progress, close any open reports and load 1_6_Transform_Load.pbix from the Exercises folder on the desktop.
+
+    Open the csv file DimCustomer.csv from Datasets/WWI folder on the desktop.
+    Select the Transform Data button.
+    Remove the first row. It contains mostly blanks and must be erroneous.
+    Make the resulting first row the header row.
+    Delete the columns Valid From and Valid To.
+    Close and apply.
+    In the Fields pane, select the Edit Query menu option from DimCustomer.
+
+
+#---------------------------------------------------------------------
+
+Field aggregation
+
+Now that we've loaded DimCustomer and cleaned it up, let's create a visualization with it. Power BI automatically sums up numerical fields in a visualization. For example, the default is to show the sum of all the sale totals, rather than the average sale total. In this exercise, you will try a new aggregation.
+
+If you lost progress, close any open reports and load 1_7_Field_Agg.pbix from the Exercises folder on the desktop.
+
+    Check that Power BI recognized a relationship between FactSale and DimCustomer.
+    Add a new page tab.
+    Make a Clustered Column Chart using Buying Group from DimCustomer and Total Including Tax from FactSale.
+    Change it so that the value is the minimum of Total Including Tax.
+
+
+
+#---------------------------------------------------------------------
+Another video
+
+#---------------------------------------------------------------------
+Transforming columns
+
+Earlier you practiced cleaning data at row-level, like deleting erroneous rows or changing the header row. Now, we'll take a look at issues at the column-level.
+
+If you lost progress, close any open reports and load 1_8_Transforming_Columns.pbix from the Exercises folder on the desktop.
+
+    Create a Card visualization with the value Credit Limit from DimCustomer.
+    The card should show ? -, which is unexpected! Edit the query of DimCustomer to open up the Power Query Editor and fix the Credit Limit column.
+    Select the Transform Data option and replace values so that ?s are replaced with blanks in Credit Limit.
+    Repeat so that -s are replaced with blanks for the Credit Limit column.
+    Change the data type of Credit Limit from Text to Decimal Number.
+    Close and apply and return to the Report view. In the card, change the value to be the average Credit Limit.
+
+
+#---------------------------------------------------------------------
+Formatting currency
+
+Now that you know more about formatting data types. Let's go back to the first report you made, which should be the first page tab titled "Sales Data". Take a look at the formatting of the data in the table. Let's improve the formatting of the Profit and the Total Including Tax columns so it's immediately clear they are monetary values, unlike Quantity. If you lost progress, close any open reports and load 1_9_Format_Currency.pbix from the Exercises folder on the desktop.
+
+    In the Data view of FactSale, select the Total Including Tax column.
+    Using Column tools, change the format to Currency.
+    Change the number of decimal places shown to 2 instead of Auto.
+    Change the default aggregation from Sum to Average .
+    Repeat the same format and decimal place changes to the Profit column.
+    Add a card to your report and select Total Including Tax
+
+
+#---------------------------------------------------------------------
+Making maps with geographic data
+
+Maps are an engaging way to present data with a geographic layer. Imagine we wanted to depict the profit each state in the US generates. We could create a bar chart showing the states and the profit they generate. However, since there are 50 states, a map is much easier to scan for patterns and outliers.
+
+If you lost progress, close any open reports and load 1_10_Making_Maps.pbix from the Exercises folder on the desktop.
+
+    Load the dimension table DimCity.csv from the Datasets/WWI folder on the desktop and make sure a relationship is found with FactSale.
+    In the Data view, change the Data category of DimCity's State Province to State or Province.
+    Make sure the default aggregation for Profit from FactSale is Average.
+    Create a Map visualization using State Province as location and Profit as size on the Page 1 tab (second tab).
+    Add a Slicer for the field Sales Territory.
+    Arrange the report to your liking and add a title.
+
+Using the map and the slicer, which state generates the most profit in the Rocky Mountain sales territory?
+
+
+
+######################################################################
+######################################################################
+######################################################################
+
+######## Visualizing Data (Module 02-030)
+######################################################################
+
+Visualization options
+    Visualization types
+        Column and bar charts
+            Stacked bar and column chart
+            Clustered bar and column chart
+            100% stacked bar and column chart
+            Combo chart
+        Line charts
+        Area charts
+        Pie and donut charts
+        Tree maps
+        Card, multi-row card, KPI, gauge chart
+        Table and matrix
+    Editing visualizations
+
+    Contoso data warehouse dataset
+
+    Snowflake schema
+
+    Fact Table:
+        FactStrategyPlan
+    Dimension Tables:
+        DimAccount
+        DimDate
+        DimEntity
+        DimProductCategory
+        DimScenario
+
+Another instrunctional video Making changes
+
+#---------------------------------------------------------------------
+
+Changing visuals
+
+Time to get to work! You are going to change and format visuals. First, you'll turn the donut chart into a tree map to get a better understanding of the product categories. Then, you'll change the simple card visual to a multi-row card so that it's possible to closely track the actual, forecasted, and budgeted amounts.
+
+Begin by closing any open reports and opening the 2_1_Changing_Visuals.pbix from the Exercises folder on the desktop.
+
+    Change the donut chart to a tree map.
+    Go into the formatting settings and set the title of the chart to Product Category Amount with a size of 16.
+    Change the card in the top left hand corner to a multi-row card.
+    Add the scenario name to the multi-row card.
+
+
+
+#---------------------------------------------------------------------
+
+Editing properties
+
+Let's keep working on this report and make it look even nicer. This time around, you are going to edit the bottom two visuals in the report. You want to see the data in a summarized way so the table needs to become a matrix. Additionally, you want to show the amount by month in a bar chart.
+
+If you lost progress, close any open reports and load 2_2_Editing_Properties.pbix from the Exercises folder on the desktop.
+
+    Change the table to a matrix.
+    Go into the formatting settings and change the text size of the Row Headers and Column Headers to 18.
+    Go to the Values section to change the font size in the rest of the columns to 18 as well.
+
+
+#---------------------------------------------------------------------
+
+instrunctional video Sorting and more formatting
+
+#---------------------------------------------------------------------
+
+Sorting data
+
+Sorting is a common method used for visualizing data in a form that makes it easier to comprehend the story the data is telling. It's your job to sort the months in the bar chart in the correct order, from January to December. This will make it easier to interpret the visual and look at amount changes over time.
+
+Begin by closing any open reports and opening the 2_3_Sorting_Data.pbix from the Exercises folder on the desktop.
+
+    Go to the Data View to make sure that ShortMonth in the DimDate table is ordered by MonthNumber.
+    Go back to the report and sort the columns in the Monthly Amount visual by month instead of amount.
+    Sort in ascending order.
+
+How is the sales amount evolving throughout the year?
+
+#---------------------------------------------------------------------
+
+Using the slicer
+
+Let's apply some more advanced formatting to our report. You find that the slicer in the top right takes up a bit too much space in the report. There are a lot of categories and it would be better to not show them all but enable users to select from a dropdown menu instead.
+
+If you lost progress, close any open reports and load 2_4_Using_The_Slicer.pbix from the Exercises folder on the desktop.
+
+    Change the slicer to a dropdown box.
+    Go to the formatting options and turn off the slicer header.
+
+Is it possible to change the slicer back to a list?
+
+#---------------------------------------------------------------------
+
+Making it look good
+
+Before your report is ready to share with other users, it's worth taking a final pass and making sure everything is looking great. In this exercise, you'll format the report by changing the background color and making sure every visual has an appropriate size.
+
+If you lost progress, close any open reports and load 2_5_Making_It_look_Good.pbix from the Exercises folder on the desktop.
+
+    Change the theme of the report to the Sunset theme.
+    Adjust the height of the dropdown box to be the same as the multi-row card.
+
+What value do you need to change to move the card or another visual to the right or left without resizing?
+
+#---------------------------------------------------------------------
+
+Drilling down and filtering
+
+***Drilling down
+    Show data at a high level
+    Option to show a more detailed level
+
+Example:
+    Year
+    Quarter
+    Month
+    Day 
+
+    Company
+    Region
+    Country
+    Division
+    Unit 
+
+***Drilling down on a visual
+    Drill down all fields at once
+    Expand all fields at once
+    Drill down one field at a time
+
+***Filtering
+
+    Display data based on some selected criteria
+    Examples:
+        Filter on one year or one customer
+        Show the top 5 regions
+    Types of Filters in Power BI
+        Visual-level Filters
+        Page-level Filters
+        Report-level Filters
+
+Turning off filtering
+
+    Don't allow the end-user of your report to change the Filters
+    In Power BI: turning off interactions
+        Visual will not change when another field is selected
+
+#---------------------------------------------------------------------
+
+Looking at the data
+
+If you'd like to see the data that Power BI uses to create a visualization, you can display that data. You can even export the data as an .xlsx or .csv file so you can open it in Excel later. In this exercise, you'll look at the data and export it to a csv file that you will then open up with Windows' default text editor, Notepad. Notepad will open automatically if you double-click on any text file, like a .csv file.
+
+Begin by closing any open reports and opening the 2_6_Looking_At_The_Data.pbix from the Exercises folder on the desktop.
+
+    Select the clustered column chart.
+    Display the underlying data.
+    Export the data as a .csv file and save it on the desktop.
+    Open the .csv file with Notepad to look at the data.
+
+
+#---------------------------------------------------------------------
+
+Creating a hierarchy
+
+Sometimes you want to drill down into a chart and see different levels of your data. With hierarchies, you can add this functionality to your Power BI reports. Let's create a date hierarchy that looks like this: Year-Quarter-Month-Day.
+
+Once you have created the hierarchy, you can drill down using the following drill controls:
+
+    Down arrow: drill down one field at a time
+    Double arrow: drill down all fields at once
+    Double arrow with a line: expand all fields at once
+
+If you lost progress, close any open reports and load 2_7_Creating_A_Hierarchy.pbix from the Exercises folder on the desktop.
+
+    Navigate to the DimDate table in the Data View.
+    Create a hierarchy that starts with Year, goes on to the QuarterFull, then the MonthName, and ends with the DateKey.
+    Rename the hierarchy to Date Hierarchy.
+    In the "Monthly Amount" column chart, replace the ShortMonth Axis value of the column chart by the Date Hierarchy.
+    Use the drill controls in the top right corner of the visual to explore the different levels.
+
+
+#---------------------------------------------------------------------
+
+Adding a filter
+
+Filtering is an important tool when you're creating Power BI reports. You don't always want to look at all of the data. Limiting the data used in visuals to only a selection that is relevant can help you answer more detailed business questions.
+
+In the report, you can see that the cards on the Sales Analysis page tab are labeled Actual, Forecast, and Budget, but they all have the same values. You'll need to apply some filters to fix this.
+
+Begin by closing any open reports and opening 2_8_Adding_A_Filter.pbix from the Exercises folder on the desktop.
+
+    Open the Filters pane.
+    Add a filter to the "Actual" card visual that filters on rows where ScenarioName is equal to Actual.
+    Add a filter to the "Forecast" card visual that filters on rows where ScenarioName is equal to Forecast.
+    Add a filter to the "Budget" card visual that filters on rows where ScenarioName is equal to Budget.
+
+What was the total forecasted amount?
+
+#---------------------------------------------------------------------
+
+Turning off interactions
+
+By default, visualizations on a report page can be used to cross-filter the other visualizations on the page. Sometimes, you want to disable this functionality and keep a chart static regardless of what selections have been made elsewhere in the report. Let's turn off those interactions! Note that you might have to temporarily move a visual to be able to see the circle with the line through it.
+
+In this report, we want to make sure the Actual, Forecast, and Budget cards don't change when other elements are selected.
+
+If you lost progress, close any open reports and load 2_9_Turning_Off_Interactions.pbix from the Exercises folder on the desktop.
+
+    Select the "Budget Product Sold" visual.
+    Go into the interaction editing mode in the Format tab at the top of the screen.
+    Turn off interactions with each of the three cards.
+    Exit the interaction editing mode.
+    Explore how the interactions work by selecting elements in other visuals and seeing how it affects the cards.
+
+#---------------------------------------------------------------------
+
+Applying advanced filtering
+
+Let's take our filter skills up a notch! You want to find out what the five best performing stores are in terms of sales amount. To do this you'll create a new bar chart that displays only those stores. After that, you'll use some of your formatting skills from earlier in the chapter to improve your visual.
+
+If you lost progress, close any open reports and load 2_10_Applying_Advanced_Filtering.pbix from the Exercises folder on the desktop.
+
+    Remove the "Budgeted Monthly Amount" chart to make room.
+    Add a Clustered bar chart to the report, with the EntityName on the axis and the Amount as values.
+    Go to the filter pane and add a Top N filter on EntityName.
+    Show only the top five stores.
+    Change the title of the visual to Top 5 Stores by Sales.
+    Sort the columns in ascending order.
+
+What is the name of the 5th best performing Contoso store?
+
+
+######################################################################
+######################################################################
+######################################################################
+
+######## Creating Calculations with DAX (Module 03-030)
+######################################################################
+
+Introduction to DAX
+
+***What is DAX?
+    Data Analysis Expressions
+    Language to create calculations in Power BI
+        Columns, tables, measures
+    Based on Excel formulas and functions
+        e.g., SUM()
+
+***DAX functions
+Functions
+    Predefined formulas that perform calculations on specific values called arguments
+    Function syntax indicates the order of arguments expected
+Microsoft documentation:
+    https://docs.microsoft.com/en-us/dax/dax-function-reference
+
+***DAX functions examples
+    SUM()
+        Syntax: SUM(<column>)
+        Description: Adds all the numbers in a column.
+        One argument: <column>
+    LEFT()
+        Syntax: LEFT(<text>, <num_chars>)
+        Description: Returns the specificied number of characters from the start of a text.
+        Example: LEFT('DataCamp', 4) = 'Data'
+        Two arguments: <text> , <num_chars>
+
+***Power BI Intellisense
+***Creating calculations
+***Creating calculated columns
+    Can be based on other columns from any table
+    Calculated at data load and when the data is refreshed
+
+***Creating calculated tables
+    Can be based on other columns from any table
+    Calculated at data load and when the data is refreshed
+        Example uses:
+            Blank table
+            Copy an existing table
+
+***Creating calculated measures
+    Definied calculations
+    Calculated as you interact and filter
+    Calculated at query time
+        More efficient than every time a table is accessed
+
+***Calculated measures vs columns
+
+Calculated columns:
+    For evaluating each row
+    Add a new column to an existing table
+    Example: Profit
+        The Sales Amount column minus the Cost column and the Tax column
+
+Calculated measures:
+    For aggregating multiple rows
+    Results in another field that you can add to a visualization
+    Example: Average Transaction
+        The average of the values in the Sales Amount column
+
+Another video Calculated tables and columns
+
+#---------------------------------------------------------------------
+
+Generating passwords
+
+In the previous video, we created a new field called LoginID in DimCustomer. We also used a DAX function called LEFT() which returns the first specified number of characters of a text. As you might have guessed, there's also RIGHT(), which returns the last specified number of characters of a text.
+
+Along with providing customers with a username, we want to provide a temporary password. We want something that's easy to remember but not too easy to guess for security reasons. In this exercise, you will generate a new calculated column called TempPassword by combining:
+
+    The last four digits of a customer's phone number
+    The customer's year of birth (e.g, 1985)
+
+Close any open reports.
+
+    Load 3_1_Generating_Passwords.pbix from the Exercises folder.
+    Create a new column called TempPassword in DimCustomer. Don't forget to save the column by clicking the check mark.
+    Go to the Data view to check the new column created.
+
+Which is the correct DAX formula to create TempPassword as described above?
+
+
+
+#---------------------------------------------------------------------
+
+Nested function
+
+Microsoft provides extensive documentation of all the DAX functions. For our calculated columns, we'll be mostly looking at DAX text functions. Here, you will use the LOWER() function which converts text to all lower case. We want to use LOWER() to make LoginID fully lowercase, as is standard for usernames. To accomplish this, in this exercise, you will complete your first nested function. A nested function is a function within a function like FUNCTION1(FUNCTION2(columnname)).
+
+If you lost progress, close any open reports and load 3_2_Nested_Function.pbix from the Exercises folder.
+
+    In the Data view, select LoginID from DimCustomer. You should see the DAX formula in the top pane.
+    Edit the formula so that it uses the LOWER() function to make LoginID fully lowercase.
+
+Which DAX formula does not lowercase all components of LoginID?
+
+#---------------------------------------------------------------------
+
+Profit column
+
+Along with DAX functions, there are DAX operators. These operators include arithmetic operations, like + (adding), - (subtracting), and * (multiplication). Let's try it out!
+
+In the FactInternetSale table, we would like to create a column to see how much profit we gained from each order. To calculate profit, we need to subtract the cost of the product and tax paid from the sales amount. Upon looking at the FactInternetSale table, we see that there are columns for TotalProductCost, TaxAmt, and SalesAmount.
+
+If you lost progress, close any open reports and load 3_3_Profit_Column.pbix from the Exercises folder.
+
+    Create a new column in the FactInternetSale called Profit.
+    Write a DAX formula to calculate profit as described above and commit it.
+    In the Report view, create a card that shows the sum of Profit.
+
+What does the card display?
+
+Right on! There are couple ways you could've written the formula. 
+For instance, you could use two subtract operators: 
+Profit = FactInternetSale[SalesAmount]-FactInternetSale[TotalProductCost]-FactInternetSale[TaxAmt], 
+or, you could use an addition and subtract operator with correct parenthesis usage:
+Profit = FactInternetSale[SalesAmount]-(FactInternetSale[TotalProductCost]+FactInternetSale[TaxAmt])
+
+#---------------------------------------------------------------------
+
+Average function
+
+In the previous video, we made a calculated field to find the average amount of a transaction. It used two other calculated fields we made, by dividing Total Sales and Transaction Count. Although the formula we used works, there is actually an AVERAGE() DAX function we could've used all along. Usually, less is more in programming, so in this exercise you'll change the formula behind Average Transaction to use the AVERAGE() function.
+
+    Close any open reports and load 3_4_Average_Function.pbix from the Exercises folder.
+    Find the formula of the calculated measure Average Transaction from the Calculations table.
+    Edit the formula so that is uses AVERAGE() to find the average sales amount of a transaction. Commit your change.
+    Format Average Transaction so that it is in currency format with two decimal points.
+
+#---------------------------------------------------------------------
+
+Product count
+
+In the AdventureWorks dataset, you may have noticed that there is a dimension table called DimProduct. You can go through it in the Data view to see how it holds information on products sold by AdventureWorks from bike parts to accessories. Each product has a unique ProductKey that connects it with the fact table. In this exercise, you will create a calculated measure to find out how many different types of products are sold by AdventureWorks.
+
+If you lost progress, close any open reports and load 3_5_Product_Count.pbix from the Exercises folder.
+
+    Create a new measure called Product Count in the Calculations table.
+    Write a DAX formula that counts the number of products there are in DimProduct and commit it.
+    Create a card to display Product Count.
+
+
+#---------------------------------------------------------------------
+
+Profit margin ratio
+
+The profit margin ratio compares the total profit to the total sales. It's an important financial metric and it's always expressed as a percentage. In this exercise, you will create a measure to represent the profit margin ratio. We already have Total Sales, but we need Total Profit. Luckily, in an earlier exercise, we created a Profit column that we can use to make Total Profit.
+
+If you lost progress, close any open reports and load 3_6_Profit_Margin_Ratio.pbix from the Exercises folder.
+
+    Create a measure called Total Profit which takes the sum of FactInternetSale's Profit.
+    Create a measure called Profit Margin Ratio which divides Total Profit by Total Sales.
+    Make sure all your measures are in the Calculations table.
+    Format Profit Margin Ratio so that it displays as a percentage with two decimal points.
+    Create a column chart with DimDate's FiscalYear as the Axis and Profit Margin Ratio as the Value.
+
+In which year did AdventureWorks achieve the highest profit margin ratio?
+
+#---------------------------------------------------------------------
+
+Calculated measures and Quick Measures
+
+**Calculate function
+Syntax: CALCULATE(Aggregation, filter, [filter]...)
+
+    Aggregation:
+        SUM() , COUNT() , AVERAGE() , etc
+        Another calculated measure
+    Filter:
+        ProductColor = "RED"
+        SalesLocation = "New York"
+    Example: Calculate sales for New York Office
+        NYC Sales = Calculate(SUM[Sales], SalesLocation= "New York")
+
+***Quick measures
+Complex measures without writing DAX
+Menu provides calculations under 6 categories:
+    Aggregates, Filters, Time intelligence, Totals,
+    Mathematical Operations, Text
+All you need to do is add the fields needed
+
+***Time-based calculations
+A date dimension allows us to calculate time values easily
+    e.g., year to date, quarter over quarter growth
+Provide the ability to create in-depth time analysis
+
+Another demo video
+
+#---------------------------------------------------------------------
+
+Calculate function
+
+After loading the report, take a closer look at the data model AdventureWorks is using in the Data view. There's a table called DimProductCategory that holds four different categories of products: Bikes, Components, Clothing, and Accessories. This is represented in the column EnglishProductCategoryName. In the next set of exercises, we'll analyze sales based on product category. Let's begin by using the CALCULATE() function to make a measure that represents profit made from clothing products.
+
+    Close any open reports and load 3_7_Calculate_Function.pbix from the Exercises folder.
+    Create a new page tab called "Profit from Categories".
+    In the Calculations table, create a new measure called Total Clothing Profit.
+    Write a DAX formula using CALCULATE() that uses Total Profit and EnglishProductCategoryName to calculate profit made from "clothing" products.
+    Create a card and add Total Clothing Profit to it.
+    Add a slicer with DimDate's Calendar Year. Change the slicer type to List.
+
+How much profit was made in 2014 from clothing products?
+
+Cool clothing calculation! Don't forget you can select your new measure Total Clothing Profit and format it! CALCULATE() can take more than one filter. For example, if I wanted to get clothing profit from the United States, I could do: Total Clothing USA Profit = CALCULATE([Total Profit], DimProductCategory[EnglishProductCategoryName] = "Clothing", DimSalesTerritory[SalesTerritoryCountry] = "USA")
+
+#---------------------------------------------------------------------
+
+Your first Quick Measure
+
+We know how much profit AdventureWorks is gaining from clothing profits, but it doesn't mean much if we don't know how it compares to other product categories. Let's change that in this exercise by adding a Percentage difference from Filtered Value Quick Measure.
+
+If you lost progress, close any open reports and load 3_8_Your_First_Quick_Measure.pbix from the Exercises folder.
+
+    Create a Quick measure using the Percentage difference from Filtered Value calculation.
+    The base value should be the total profit from the Calculations table and filtered on English product category name from DimProductCategory with clothing as the baseline.
+    In the Profit from Categories page tab, create a clustered column chart with the quick measure you created and EnglishProductCategoryName. Format the viz so that Data labels are on.
+
+As a reminder, you can enlarge this window by clicking on the full-screen button in the bottom right corner. This will ensure the pop-up windows aren't cut off.
+
+#---------------------------------------------------------------------
+
+Another demo video
+
+CALCULATE() and dates
+
+CALCULATE() is one of the most commonly used DAX functions. You've used the calculate function before to see how much profit clothing products generate. Now you will use it to calculate how much profit was made in 2014.
+
+    Close any open reports and load 3_9_Calculate_Dates.pbix from the Exercises folder.
+    Create a new page tab called Date Profits.
+    Add a new measure called 2014 Profits to the Calculations table.
+    Write a DAX formula with CALCULATE() and DimDate's CalendarYear to find the total profit made in 2014.
+    Format 2014 Profits so that it displays as currency with three decimal points.
+    Add 2014 Profits to a card in the Date Profits page tab.
+
+Nice job! The formula to use is 2014 Profits = CALCULATE([Total Profit], DimDate[CalendarYear]=2014) Although, we can find this figure with slicers and filters, it's often more practical to have a dedicated measure. It's easier to format and we can use it to make other measures.
+
+#---------------------------------------------------------------------
+
+Prior year profits
+
+Now, we want to compare performance with last year's performance. However, we don't want to limit our comparison to a certain time period. For example, we want to be able to look at performance same quarter or same month last year. Looks like we need the SAMEPERIODLASTYEAR() function!
+
+If you lost progress, close any open reports and load 3_10_Prior_Year_Profits.pbix from the Exercises folder.
+
+    Mark the DimDate table as a date table.
+    Create a new measure called Prior Year Profits in the Calculations table.
+    Write a DAX formula to calculate prior year profits using the CALCULATE() function and SAMEPERIODLASTYEAR() function, which takes the marked date table's FullDateAlternateKey.
+    Create a matrix visualization with Date Hierarchy (from the DimDate table), Total Profit, and Prior Year Profits.
+    Sort the matrix by CalendarYear and increase the font size of the values and headers if necessary under Format.
+
+What are the prior year profits of 2013's first quarter?
+
+Right on! This means that $575,863.03 in profit was made in the first quarter of 2012 and our matrix shows the same value under 2012 Q1's Total Profit. The formula you had to use was: Prior Year Profits = CALCULATE([Total Profit], SAMEPERIODLASTYEAR(DimDate[FullDateAlternateKey])) "Same period" can mean year, quarter, months, days, and so on. This gives you flexibility in how granular you want your metric to be.
+
+#---------------------------------------------------------------------
+
+Quarter over quarter change
+
+A useful financial metric has always been quarter over quarter change, often times denoted as Q/Q. It lets us quantify growth from the previous quarter to the current term. This allows us to see more short-term changes compared to the last exercise's Prior year profit measure which compares profit to a year ago. Let's add it to our matrix!
+
+If you lost progress, close any open reports and load 3_11_Quarter_Over_Quarter_Change.pbix from the Exercises folder.
+
+    In the Calculations table, create a Quick Measure using the Quarter-over-quarter change calculation.
+    Complete the quick measure so that it calculates quarter-over-quarter change on Total Profit.
+    Add Total Profit QoQ% to the existing matrix on the "Date Profits" page tab.
+
+As a reminder, you can enlarge this window by clicking on the full-screen button in the bottom right corner. This will ensure the pop-up windows aren't cut off.
+
+For the first quarter of 2012, what was the quarter-over-quarter profit change?
+
+
+
+
+END
