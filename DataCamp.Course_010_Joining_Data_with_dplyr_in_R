@@ -1,0 +1,891 @@
+######################################################################
+######################################################################
+######################################################################
+
+# COURSE 010_Joining Data with dplyr in R
+
+######################################################################
+######################################################################
+######################################################################
+
+########  Joining Tables  (Module 01-010)
+######################################################################
+
+1. The inner_join verb
+
+LEGO dataset
+
+> The sets table
+
+sets (LEGO DATA)
+theme (LEGO DATA)
+
+sets %>%
+	inner_join(themes, by = c("theme_id" = "id"))
+
+ #in the output you combine both tables
+ #customize join
+
+sets %>%
+	inner_join(themes, by = c("theme_id" = "id"),
+	suffix = c("_set", "_theme"))
+
+
+# most common themes
+sets %>%
+	inner_join(themes, by = c("theme_id" = "id"),
+	suffix = c("_set", "_theme"))
+	count(name_theme, sort = TRUE)
+	
+#######
+
+What columns would you join on?
+
+You'll be joining together the parts and part_categories tables. You can first inspect them in the console. To join these two tables together using the inner_join verb, what columns would you join from each table?
+
+Since you'll be working with dplyr throughout the course, the package will be preloaded for you in each exercise.
+
+glimpse(parts)
+glimpse(part_categories)
+
+R//: c("part_cat_id" = "id")
+
+Joining parts and part categories
+
+The inner_join is the key to bring tables together. To use it, you need to provide the two tables that must be joined and the columns on which they should be joined.
+
+In this exercise, you'll join a list of LEGO parts, available as parts, with these parts' corresponding categories, available as part_categories. For example, the part Sticker Sheet 1 for Set 1650-1 is from the Stickers part category. You can join these tables to see all parts' categories!
+
+STEP 01
+
+# Add the correct verb, table, and joining column
+parts %>% 
+  inner_join(part_categories, by = c("part_cat_id" = "id"))
+  
+STEP 02
+
+# Use the suffix argument to replace .x and .y suffixes
+parts %>% 
+	inner_join(part_categories, by = c("part_cat_id" = "id"), suffix = c("_part", "_category"))
+	
+###
+
+Joining with a one-to-many relationship
+
+inventories #represent a product that is a combination of parts
+
+joining sets and inventories
+
+sets %>%
+	inner_join(inventories, by = c("set_num"))
+#cuando las variables tienen el mismo nombre
+#esta tiene más datos, porque existen varias versiones del mismo set, eso se puede filtrar
+
+sets %>%
+	inner_join(inventories, by = c("set_num")) %>%
+	filter(version == 1)
+#tiene menos observaciones, tiene menos datos incluso porque posiblemente existe un set sin version uno.
+#prestar atención al numero de columnas y filas
+
+inventory_parts (color id y cantidad)
+
+###
+
+Joining parts and inventories
+
+The LEGO data has many tables that can be joined together. Often times, some of the things you care about may be a few tables away (we'll get to that later in the course). For now, we know that parts is a list of all LEGO parts, and a new table, inventory_parts, has some additional information about those parts, such as the color_id of each part you would find in a specific LEGO kit.
+
+Let's join these two tables together to observe how joining parts with inventory_parts increases the size of your table because of the one-to-many relationship that exists between these two tables.
+
+# Combine the parts and inventory_parts tables
+parts %>%
+  inner_join(inventory_parts, by = c("part_num"))
+
+Joining in either direction
+
+An inner_join works the same way with either table in either position. The table that is specified first is arbitrary, since you will end up with the same information in the resulting table either way.
+
+Let's prove this by joining the same two tables from the last exercise in the opposite order!
+
+# Combine the parts and inventory_parts tables
+inventory_parts %>%
+  inner_join(parts, by = c("part_num"))
+
+sets %>%
+	# Add inventories using an inner join 
+	inner_join(inventories, by = c("set_num")) %>%
+	# Add inventory_parts using an inner join 
+	inner_join(inventory_parts, by = c("id" = "inventory_id"))
+	
+What's the most common color?
+
+Now let's join an additional table, colors, which will tell us the color of each part in each set, so that we can answer the question, "what is the most common color of a LEGO piece?"
+
+
+
+# Add an inner join for the colors table
+sets %>%
+	inner_join(inventories, by = "set_num") %>%
+	inner_join(inventory_parts, by = c("id" = "inventory_id")) %>%
+  inner_join(colors, by = c("color_id" = "id"),
+            suffix = c("_set", "_color"))  %>%
+  count(name_color, sort = TRUE)
+
+########  Left and Right Joins   (Module 02-010)
+######################################################################
+
+The left_join verb
+
+# Example
+inventory_parts_joined <- inventories %>%
+	inner_join(inventory_parts, by = c("id" = "inventory_id")) %>%
+	select(-id, -version)  %>%
+	arrange(desc(quantity))
+inventory_parts_joined
+
+batmobile <- inventory_parts_joined %>%
+	filter(set_num == "7784-1") %>%
+	select(-set_num)
+
+batwing <- nventory_parts_joined %>%
+	filter(set_num == "70916-1") %>%
+	select(-set_num)
+
+batmobile %>%
+	inner_join(batwing, by = c("part_num", "color_id"),
+	suffix = c("_batmobile", "_batwing"))
+
+
+batmobile %>%
+	left_join(batwing, by = c("part_num", "color_id"),
+	suffix = c("_batmobile", "_batwing"))
+
+###
+
+Left joining two sets by part and color
+
+In the video, you learned how to left join two LEGO sets. Now you'll practice your ability to do this looking at two new sets: the Millennium Falcon and Star Destroyer sets. We've created these for you and they have been preloaded for you:
+
+millennium_falcon <- inventory_parts_joined %>%
+  filter(set_num == "7965-1")
+
+star_destroyer <- inventory_parts_joined %>%
+  filter(set_num == "75190-1")
+  
+# Combine the star_destroyer and millennium_falcon tables
+millennium_falcon %>%
+	left_join(star_destroyer, by = c("part_num", "color_id"),
+	suffix = c("_falcon", "_star_destroyer"))
+
+Left joining two sets by color
+
+In the videos and the last exercise, you joined two sets based on their part and color. What if you joined the datasets by color alone? As with the last exercise, the Millennium Falcon and Star Destroyer sets have been created and preloaded for you:
+
+millennium_falcon <- inventory_parts_joined %>%
+  filter(set_num == "7965-1")
+
+star_destroyer <- inventory_parts_joined %>%
+  filter(set_num == "75190-1")
+
+# Aggregate Millennium Falcon for the total quantity in each part
+millennium_falcon_colors <- millennium_falcon %>%
+  group_by(color_id) %>%
+  summarize(total_quantity = sum(quantity))
+
+# Aggregate Star Destroyer for the total quantity in each part
+star_destroyer_colors <- star_destroyer %>%
+  group_by(color_id) %>%
+  summarize(total_quantity = sum(quantity))
+
+# Left join the Millennium Falcon colors to the Star Destroyer colors
+millennium_falcon_colors %>%
+  left_join(star_destroyer_colors, by = c("color_id"),
+	suffix = c("_falcon", "_star_destroyer"))
+	
+	Finding an observation that doesn't have a match
+
+Left joins are really great for testing your assumptions about a data set and ensuring your data has integrity.
+
+For example, the inventories table has a version column, for when a LEGO kit gets some kind of change or upgrade. It would be fair to assume that all sets (which joins well with inventories) would have at least a version 1. But let's test this assumption out in the following exercise.
+
+inventory_version_1 <- inventories %>%
+  filter(version == 1)
+
+# Join versions to sets
+sets %>%
+  left_join(inventory_version_1, by = c("set_num")) %>%
+  # Filter for where version is na
+  filter(is.na(version))
+  
+#######
+
+The right-join verb
+
+batmobile %>%
+	right_join(batwing, by = c("part_num", "color_id"),
+	suffix = c("_batmobile", "_batwing"))
+
+sets  %>%
+	count(theme_id, sort = TRUE) %>%
+	right_join(themes, by = c("theme_id" = "id"))
+	
+library(tidyr)
+
+sets  %>%
+	count(theme_id, sort = TRUE) %>%
+	right_join(themes, by = c("theme_id" = "id"))
+	replace_na(list(n = 0))
+
+Counting part colors
+
+Sometimes you'll want to do some processing before you do a join, and prioritize keeping the the second (right) table's rows instead. In this case, a right join is for you.
+
+In the example below, we'll count the part_cat_id from parts, before using a right_join to join with part_categories. The reason we do this is because we don't only want to know the count of part_cat_id in parts, but we also want to know if there are any part_cat_ids not present in part_categories.
+
+parts %>%
+	count(part_cat_id) %>%
+	right_join(part_categories, by = c("part_cat_id" = "id")) %>%
+	# Filter for NA
+	filter(is.na(n))
+	
+Cleaning up your count
+
+In both left and right joins, there is the opportunity for there to be NA values in the resulting table. Fortunately, the replace_na function can turn those NAs into meaningful values.
+
+In the last exercise, we saw that the n column had NAs after the right_join. Let's use the replace_na column, which takes a list of column names and the values with which NAs should be replaced, to clean up our table.
+
+parts %>%
+	count(part_cat_id) %>%
+	right_join(part_categories, by = c("part_cat_id" = "id")) %>%
+	# Use replace_na to replace missing values in the n column
+	replace_na(list(n = 0))
+	
+
+Joining tables to themselves
+
+themes %>%
+	inner_join(themes, by = c("parent_id" = "id"),
+	suffix = c("_child", "_parent")) %>%
+	filter(name_child == "The Lord of the Rings")
+#or
+	filter(name_parent == "The Lord of the Rings")
+	
+	#####
+	
+Joining themes to their children
+
+Tables can be joined to themselves!
+
+In the themes table, which is available for you to inspect in the console, you'll notice there is both an id column and a parent_id column. Keeping that in mind, you can join the themes table to itself to determine the parent-child relationships that exist for different themes.
+
+In the videos, you saw themes joined to their own parents. In this exercise, you'll try a similar approach of joining themes to their own children, which is similar but reversed. Let's try this out to discover what children the theme "Harry Potter" has.
+
+themes %>% 
+	# Inner join the themes table
+	inner_join(themes, by = c("id" = "parent_id"),
+	suffix = c("_parent", "_child")) %>%
+	# Filter for the "Harry Potter" parent name 
+	filter(name_parent == "Harry Potter")
+	
+Joining themes to their grandchildren
+
+We can go a step further than looking at themes and their children. Some themes actually have grandchildren: their children's children.
+
+Here, we can inner join themes to a filtered version of itself again to establish a between our last join's children and their children.
+
+# Join themes to itself again to find the grandchild relationships
+themes %>% 
+  inner_join(themes, by = c("id" = "parent_id"), suffix = c("_parent", "_child")) %>%
+  inner_join(themes, by = c("id_child" = "parent_id"), suffix = c("_parent", "_grandchild"))
+  
+  Left-joining a table to itself
+
+So far, you've been inner joining a table to itself in order to find the children of themes like "Harry Potter" or "The Lord of the Rings".
+
+But some themes might not have any children at all, which means they won't be included in the inner join. As you've learned in this chapter, you can identify those with a left_join and a filter().
+
+ themes %>% 
+  # Left join the themes table to its own children
+  left_join(themes, by = c("id" = "parent_id"), suffix = c("_parent", "_child")) %>%
+  # Filter for themes that have no child themes
+  filter(is.na(name_child))
+
+########  Full, Semi, and Anti Joins    (Module 03-010)
+######################################################################
+
+The full_join verb
+
+inventory_parts_joined <- inventories %>%
+	inner_join(inventory_parts, by = c("id" = "inventory_id")) %>%
+	select(-id, -version)  %>%
+	arrange(desc(quantity))
+inventory_parts_joined
+
+batmobile <- inventory_parts_joined %>%
+	filter(set_num == "7784-1") %>%
+	select(-set_num)
+
+batwing <- nventory_parts_joined %>%
+	filter(set_num == "70916-1") %>%
+	select(-set_num)
+
+batmobile %>%
+	full_join(batwing, by = c("part_num", "color_id"),
+	suffix = c("_batmobile", "_batwing"))
+	replace_na(list(quantity_batmobile = 0,
+			quantity_batwing = 0))
+
+#####
+
+Differences between Batman and Star Wars
+
+In the video, you compared two sets. Now, you'll compare two themes, each of which is made up of many sets.
+
+First, you'll need to join in the themes. Recall that doing so requires going through the sets first. You'll use the inventory_parts_joined table from the video, which is already available to you in the console.
+
+inventory_parts_joined <- inventories %>%
+  inner_join(inventory_parts, by = c("id" = "inventory_id")) %>%
+  arrange(desc(quantity)) %>%
+  select(-id, -version)
+
+inventory_parts_joined %>%
+  # Combine the sets table with inventory_parts_joined 
+  inner_join(sets, by = c("set_num")) %>%
+  # Combine the themes table with your first join 
+  inner_join(themes, by = c("theme_id" = "id"),
+	suffix = c("_set", "_theme"))
+	
+Aggregating each theme
+
+Previously, you combined tables to compare themes. Before doing this comparison, you'll want to aggregate the data to learn more about the pieces that are a part of each theme, as well as the colors of those pieces.
+
+The table you created previously has been preloaded for you as inventory_sets_themes. It was filtered for each theme, and the objects have been saved as batman and star_wars.
+
+inventory_sets_themes <- inventory_parts_joined %>%
+  inner_join(sets, by = "set_num") %>%
+  inner_join(themes, by = c("theme_id" = "id"), suffix = c("_set", "_theme"))
+
+batman <- inventory_sets_themes %>%
+  filter(name_theme == "Batman")
+
+star_wars <- inventory_sets_themes %>%
+  filter(name_theme == "Star Wars")
+  
+  # Count the part number and color id, weight by quantity
+batman %>%
+  count(part_num, color_id, wt = quantity)
+star_wars %>%
+  count(part_num, color_id, wt = quantity)
+
+Full-joining Batman and Star Wars LEGO parts
+
+Now that you've got separate tables for the pieces in the batman and star_wars themes, you'll want to be able to combine them to see any similarities or differences between the two themes. The aggregating from the last exercise has been saved as batman_parts and star_wars_parts, and is preloaded for you.
+
+batman_parts <- batman %>%
+  count(part_num, color_id, wt = quantity)
+
+star_wars_parts <- star_wars %>%
+  count(part_num, color_id, wt = quantity)
+
+batman_parts %>%
+  # Combine the star_wars_parts table 
+  full_join(star_wars_parts, by = c("part_num", "color_id"),
+	suffix = c("_batman", "_star_wars")) %>%
+
+  # Replace NAs with 0s in the n_batman and n_star_wars columns 
+	replace_na(list(n_batman = 0, 
+			n_star_wars = 0))
+		
+Comparing Batman and Star Wars LEGO parts
+
+The table you created in the last exercise includes the part number of each piece, the color id, and the number of each piece in the Star Wars and Batman themes. However, we have more information about each of these parts that we can gain by combining this table with some of the information we have in other tables. Before we compare the themes, let's ensure that we have enough information to make our findings more interpretable. The table from the last exercise has been saved as parts_joined and is preloaded for you.
+
+parts_joined <- batman_parts %>%
+  full_join(star_wars_parts, by = c("part_num", "color_id"), suffix = c("_batman", "_star_wars")) %>%
+  replace_na(list(n_batman = 0, n_star_wars = 0))
+
+parts_joined %>%
+  # Sort the number of star wars pieces in descending order 
+  arrange(desc(n_star_wars)) %>%
+  # Join the colors table to the parts_joined table
+  inner_join(colors, by = c("color_id" = "id")) %>%
+  # Join the parts table to the previous join 
+  inner_join(parts, by = c("part_num"),
+	suffix = c("_color", "_part"))
+
+#######
+
+The semi- and anti-join verbs
+
+Mutating verbs
+- inner_join
+- left_join
+- right_join
+- full_join
+
+Filtering joins
+#Keeps or removes observations from the first table
+#Doesn't add new variables
+
+-semi_join()
+# What observations in X are also in Y
+-anti_join()
+# What observations in X are not in Y
+
+batmobile %>%
+	semi_join(batwing, by = c("color_id", "part_num"))
+
+
+batmobile %>%
+	anti_join(batwing, by = c("color_id", "part_num"))
+
+themes  %>%
+	semi_join(sets, by = c("id" = "theme_id"))
+
+themes  %>%
+	anti_join(sets, by = c("id" = "theme_id"))
+	
+##############################
+
+Something within one set but not another
+
+In the videos, you learned how to filter using the semi- and anti-join verbs to answer questions you have about your data. Let's focus on the batwing dataset, and use our skills to determine which parts are in both the batwing and batmobile sets, and which sets are in one, but not the other. While answering these questions, we'll also be determining whether or not the parts we're looking at in both sets also have the same color in common.
+
+The batmobile and batwing datasets have been preloaded for you.
+
+batmobile <- inventory_parts_joined %>%
+  filter(set_num == "7784-1") %>%
+  select(-set_num)
+
+batwing <- inventory_parts_joined %>%
+  filter(set_num == "70916-1") %>%
+  select(-set_num)
+
+# Filter the batwing set for parts that are also in the batmobile set
+batwing %>%
+  semi_join(batmobile, by = c("part_num"))
+
+# Filter the batwing set for parts that aren't in the batmobile set
+batwing %>%
+  anti_join(batmobile, by = c("part_num"))
+
+What colors are included in at least one set?
+
+Besides comparing two sets directly, you could also use a filtering join like semi_join to find out which colors ever appear in any inventory part. Some of the colors could be optional, meaning they aren't included in any sets.
+
+The inventory_parts and colors tables have been preloaded for you.
+
+# Use inventory_parts to find colors included in at least one set
+colors %>%
+  semi_join(inventory_parts, by = c("id" = "color_id"))
+  
+Which set is missing version 1?
+
+Each set included in the LEGO data has an associated version number. We want to understand the version we are looking at to learn more about the parts that are included. Before doing that, we should confirm that there aren't any sets that are missing a particular version.
+
+Let's start by looking at the first version of each set to see if there are any sets that don't include a first version.
+
+# Use filter() to extract version 1 
+version_1_inventories <- inventories %>%
+  filter(version == 1)
+
+# Use anti_join() to find which set is missing a version 1
+sets %>%
+  anti_join(version_1_inventories, by = c("set_num"))
+  
+#######
+
+#######
+
+#Visualizing set differences
+
+batmobile_colors <- batmobile %>%
+	group_by(color_id) %>% 
+	summarize(total = sum(quantity))
+
+batmobile_colors
+ 
+batwing_colors <- batwing %>%
+	group_by(color_id) %>% 
+	summarize(total = sum(quantity))
+
+batwing_colors
+
+#Comparing color schemes of sets
+
+batmobile_colors  %>%
+	full_join(batwing_colors, by = "color_id",
+	suffix = c("_batmobile", "_batwing")) %>%
+	replace_na(list(total_batmobile = 0, total_batwing = 0))
+
+#Adding the color names
+
+batmobile_colors  %>%
+	full_join(batwing_colors, by = "color_id",
+	suffix = c("_batmobile", "_batwing")) %>%
+	replace_na(list(total_batmobile = 0, total_batwing = 0)) %>%
+	inner_join(colors, by = c("color_id" = "id") )
+
+#Adding percentages
+
+colors_joined <- batmobile_colors  %>%
+	full_join(batwing_colors, by = "color_id",
+	suffix = c("_batmobile", "_batwing")) %>%
+	replace_na(list(total_batmobile = 0, total_batwing = 0)) %>%
+	inner_join(colors, by = c("color_id" = "id") ) %>%
+	mutate(total_batmobile = total_batmobile / sum(total_batmobile),
+		total_batwing = total_batwing/ sum(total_batwing),
+		difference = total_batmobile - total_batwing)
+
+colors_joined
+
+#visualizing the data
+
+library(ggplot2)
+library(forcats)
+
+color_palette <- setNames(colors_joined$rgb, colors_joined$name)
+
+colors_joined  %>%
+	mutate(name = fct_reorder(name, difference))  %>%
+	ggplot(aes(name, difference, fill = name)) +
+	geom_col() +
+	coord_flip() +
+	scale_fill_manual(values = color_palette, guide = FALSE)
+
+#####
+
+Aggregating sets to look at their differences
+
+To compare two individual sets, and the kinds of LEGO pieces that comprise them, we'll need to aggregate the data into separate themes. Additionally, as we saw in the video, we'll want to add a column so that we can understand the percentages of specific pieces that are part of each set, rather than looking at the numbers of pieces alone.
+
+The inventory_parts_themes table has been preloaded for you.
+
+inventory_parts_themes <- inventories %>%
+  inner_join(inventory_parts, by = c("id" = "inventory_id")) %>%
+  arrange(desc(quantity)) %>%
+  select(-id, -version) %>%
+  inner_join(sets, by = "set_num") %>%
+  inner_join(themes, by = c("theme_id" = "id"), suffix = c("_set", "_theme"))
+
+batman_colors <- inventory_parts_themes %>%
+  # Filter the inventory_parts_themes table for the Batman theme
+  filter(name_theme == "Batman") %>%
+  group_by(color_id) %>%
+  summarize(total = sum(quantity)) %>%
+  # Add a percent column of the total divided by the sum of the total 
+  mutate(percent = total / sum(total))
+
+# Filter and aggregate the Star Wars set data; add a percent column
+star_wars_colors <- inventory_parts_themes %>%
+  filter(name_theme == "Star Wars") %>%
+  group_by(color_id) %>%
+  summarize(total = sum(quantity)) %>%
+  mutate(percent = total / sum(total))
+  
+Combining sets
+
+The data you aggregated in the last exercise has been preloaded for you as batman_colors and star_wars_colors. Prior to visualizing the data, you'll want to combine these tables to be able to directly compare the themes' colors.
+
+batman_colors <- inventory_parts_themes %>%
+  filter(name_theme == "Batman") %>%
+  group_by(color_id) %>%
+  summarize(total = sum(quantity)) %>%
+  mutate(percent = total / sum(total))
+
+star_wars_colors <- inventory_parts_themes %>%
+  filter(name_theme == "Star Wars") %>%
+  group_by(color_id) %>%
+  summarize(total = sum(quantity)) %>%
+  mutate(percent = total / sum(total))
+
+batman_colors %>%
+  # Join the Batman and Star Wars colors
+  full_join(star_wars_colors, by = "color_id", suffix = c("_batman", "_star_wars")) %>%
+  # Replace NAs in the total_batman and total_star_wars columns
+  replace_na(list(total_batman = 0, total_star_wars = 0)) %>%
+  inner_join(colors, by = c("color_id" = "id")) 
+
+STEP 02  
+
+batman_colors %>%
+  full_join(star_wars_colors, by = "color_id", suffix = c("_batman", "_star_wars")) %>%
+  replace_na(list(total_batman = 0, total_star_wars = 0)) %>%
+  inner_join(colors, by = c("color_id" = "id")) %>%
+  # Create the difference and total columns
+  mutate(difference = percent_batman - percent_star_wars,
+         total = total_batman + total_star_wars) %>%
+  # Filter for totals greater than 200
+  filter(total > 200)
+  
+Visualizing the difference: Batman and Star Wars
+
+In the last exercise, you created colors_joined. Now you'll create a bar plot with one bar for each color (name), showing the difference in percentages.
+
+Because factors and visualization are beyond the scope of this course, we've done some processing for you: here is the code that created the colors_joined table that will be used in the video.
+
+colors_joined <- batman_colors %>%
+  full_join(star_wars_colors, by = "color_id", suffix = c("_batman", "_star_wars")) %>%
+  replace_na(list(total_batman = 0, total_star_wars = 0)) %>%
+  inner_join(colors, by = c("color_id" = "id")) %>%
+  mutate(difference = percent_batman - percent_star_wars,
+         total = total_batman + total_star_wars) %>%
+  filter(total >= 200) %>%
+  mutate(name = fct_reorder(name, difference)) 
+
+# Create a bar plot using colors_joined and the name and difference columns
+  ggplot(colors_joined, aes(name, difference, fill = name)) +
+    geom_col() +
+    coord_flip() +
+    scale_fill_manual(values = color_palette, guide = FALSE) +
+    labs(y = "Difference: Batman - Star Wars")
+
+########  Case Study: Joins on Stack Overflow Data (Module 04-010)
+######################################################################
+
+#Stack Overflow questions
+
+#question, question_tags, tags, 
+
+questions %>%
+	inner_join(question_tags, by = c("id" = "question_id"))
+
+questions_with_tags <- questions  %>%
+	inner_join(question_tags, by = c("id" = "question_id"))  %>%
+	inner_join(tags, by = c("tag_id" = "id"))
+
+questions_with_tags
+
+#Most common tags
+
+questions_with_tags  %>%
+	count(tag_name, sort = TRUE)
+
+########
+
+Left-joining questions and tags
+
+Three of the Stack Overflow survey datasets are questions, question_tags, and tags:
+
+    questions: an ID and the score, or how many times the question has been upvoted; the data only includes R-based questions
+    question_tags: a tag ID for each question and the question's id
+    tags: a tag id and the tag's name, which can be used to identify the subject of each question, such as ggplot2 or dplyr
+
+In this exercise, we'll be stitching together these datasets and replacing NAs in important fields.
+
+Note that we'll be using left_joins in this exercise to ensure we keep all questions, even those without a corresponding tag. However, since we know the questions data is all R data, we'll want to manually tag these as R questions with replace_na.
+
+STEP 01
+
+# Join the questions and question_tags tables
+questions %>%
+  left_join(question_tags, by = c("id" = "question_id"))
+  
+STEP 02
+
+# Join in the tags table
+questions %>%
+	left_join(question_tags, by = c("id" = "question_id")) %>%
+	left_join(tags, by = c("tag_id" = "id"))
+	
+STEP 03
+
+# Replace the NAs in the tag_name column
+questions %>%
+  left_join(question_tags, by = c("id" = "question_id")) %>%
+  left_join(tags, by = c("tag_id" = "id")) %>%
+  replace_na(list(tag_name = "only-r"))
+  
+Comparing scores across tags
+
+The complete dataset you created in the last exercise is available to you as questions_with_tags. Let's do a quick bit of analysis on it! You'll use familiar dplyr verbs like group_by, summarize, arrange, and n to find out the average score of the most asked questions.
+
+questions_with_tags %>%
+	# Group by tag_name
+  group_by(tag_name) %>%
+	# Get mean score and num_questions
+	summarize(score = mean(score),
+          	  num_questions = n()) %>%
+	# Sort num_questions in descending order
+	arrange(desc(num_questions))
+	
+What tags never appear on R questions?
+
+The tags table includes all Stack Overflow tags, but some have nothing to do with R. How could you filter for just the tags that never appear on an R question? The tags and question_tags tables have been preloaded for you.
+
+# Using a join, filter for tags that are never on an R question
+tags %>%
+  anti_join(question_tags, by = c("id" = "tag_id"))
+  
+
+######
+
+answers
+
+questions %>%
+	inner_join(answers, by = c("id" = "question_id"))
+
+
+######
+
+Finding gaps between questions and answers
+
+Now we'll join together questions with answers so we can measure the time between questions and answers.
+
+questions %>%
+	# Inner join questions and answers with proper suffixes
+	inner_join(answers, by = c("id" = "question_id"),
+	suffix = c("_question", "_answer")) %>%
+	# Subtract creation_date_question from creation_date_answer to create gap
+	mutate(gap = as.integer(creation_date_answer - creation_date_question))
+	
+Joining question and answer counts
+
+We can also determine how many questions actually yield answers. If we count the number of answers for each question, we can then join the answers counts with the questions table.
+
+# Count and sort the question id column in the answers table
+answer_counts <- answers %>%
+  count(question_id, sort = TRUE)
+
+
+# Combine the answer_counts and questions tables
+questions %>%
+	left_join(answer_counts, by = c("id" = "question_id")) %>%
+	# Replace the NAs in the n column
+  replace_na(list(n = 0))
+
+Joining questions, answers, and tags
+
+Let's build on the last exercise by adding the tags table to our previous joins. This will allow us to do a better job of identifying which R topics get the most traction on Stack Overflow. The tables you created in the last exercise have been preloaded for you as answer_counts and question_answer_counts.
+
+answer_counts <- answers %>%
+    count(question_id, sort = TRUE)
+
+question_answer_counts <- questions %>%
+    left_join(answer_counts, by = c("id" = "question_id")) %>%
+    replace_na(list(n = 0))
+
+
+question_answer_counts %>%
+	# Join the question_tags tables
+	inner_join(question_tags, by = c("id" = "question_id")) %>%
+	# Join the tags table
+  inner_join(tags, by = c("tag_id" = "id") )
+  
+Average answers by question
+
+The table you created in the last exercise has been preloaded for you as tagged_answers. You can use this table to determine, on average, how many answers each questions gets.
+
+tagged_answers <- question_answer_counts %>%
+    inner_join(question_tags, by = c("id" = "question_id")) %>%
+    inner_join(tags, by = c("tag_id" = "id"))
+
+Some of the important variables from this table include: n, the number of answers for each question, and tag_name, the name of each tag associated with each question.
+
+Let's use some of our favorite dplyr verbs to find out how many answers each question gets on average.
+
+tagged_answers %>%
+	# Aggregate by tag_name
+  group_by(tag_name)  %>%
+	# Summarize questions and average_answers
+    summarize(questions = n(),
+              average_answers = mean(n)) %>%
+	# Sort the questions in descending order
+    arrange(desc(questions))
+    
+######
+
+#The bind_rows verb
+
+#Comparing tables
+
+questions %>%
+	bind_rows(answers)
+
+#difference type using bind rows
+
+question_type <- questions %>%
+	mutate(type = "question")
+
+answers_type <- answers %>%
+	mutate(type = "answers")
+
+posts <- bind_rows(question_type, answers_type)
+posts 
+
+#Aggregating
+
+posts  %>%
+	group_by(type) %>%
+	summarize(average_score = mean(score))
+
+#creating date variable
+
+library(lubridate)
+
+questions_answers_year <- posts  %>%
+	mutate(year = year(creation_date)) %>%
+	count(year, type)
+
+ggplot(questions_answers_year, aes(year, n, color = type)) + geom_line()
+
+
+###
+
+Joining questions and answers with tags
+
+To learn more about the questions and answers table, you'll want to use the question_tags table to understand the tags associated with each question that was asked, and each answer that was provided. You'll be able to combine these tables using two inner joins on both the questions table and the answers table.
+
+# Inner join the question_tags and tags tables with the questions table
+questions %>%
+  inner_join(question_tags, by = c("id" = "question_id")) %>%
+  inner_join(tags, by = c("tag_id" = "id"))
+
+# Inner join the question_tags and tags tables with the answers table
+answers %>%
+  inner_join(question_tags, by = c("question_id")) %>%
+  inner_join(tags, by = c("tag_id" = "id"))
+
+Binding and counting posts with tags
+
+The tables you created in the previous exercise have been preloaded as questions_with_tags and answers_with_tags. First, you'll want to combine these tables into a single table called posts_with_tags. Once the information is consolidated into a single table, you can add more information by creating a date variable using the lubridate package, which has been preloaded for you. 
+
+questions_with_tags <- questions %>%
+  inner_join(question_tags, by = c("id" = "question_id")) %>%
+  inner_join(tags, by = c("tag_id" = "id"))
+
+answers_with_tags <- answers %>%
+  inner_join(question_tags, by = "question_id") %>%
+  inner_join(tags, by = c("tag_id" = "id"))
+
+# Combine the two tables into posts_with_tags
+posts_with_tags <- bind_rows(questions_with_tags %>% mutate(type = "question"),
+                              answers_with_tags %>% mutate(type = "answer"))
+
+
+# Add a year column, then aggregate by type, year, and tag_name
+posts_with_tags %>%
+  mutate(year = year(creation_date)) %>%
+  group_by(type, year, tag_name) %>%
+  count(type, year, tag_name)
+
+Visualizing questions and answers in tags
+
+In the last exercise, you modified the posts_with_tags table to add a year column, and aggregated by type, year, and tag_name. The modified table has been preloaded for you as by_type_year_tag, and has one observation for each type (question/answer), year, and tag. Let's create a plot to examine the information that the table contains about questions and answers for the dplyr and ggplot2 tags. The ggplot2 package has been preloaded for you.
+
+by_type_year_tag <- posts_with_tags %>%
+  mutate(year = year(creation_date)) %>%
+  count(type, year, tag_name)
+
+# Filter for the dplyr and ggplot2 tag names 
+by_type_year_tag_filtered <- by_type_year_tag %>%
+  filter(tag_name %in% c("dplyr", "ggplot2"))
+
+# Create a line plot faceted by the tag name 
+ggplot(by_type_year_tag_filtered, aes(year, n, color = type)) +
+  geom_line() +
+  facet_wrap(~ tag_name)
+  
+
+
+END

@@ -1,0 +1,1436 @@
+######################################################################
+######################################################################
+######################################################################
+
+# COURSE 008_Introduction to Function Writing in R
+
+######################################################################
+######################################################################
+######################################################################
+
+########  How to write a function  (Module 01-008)
+
+Calling functions
+
+One way to make your code more readable is to be careful about the order you pass arguments when you call functions, and whether you pass the arguments by position or by name.
+
+gold_medals, a numeric vector of the number of gold medals won by each country in the 2016 Summer Olympics, is provided.
+
+For convenience, the arguments of median() and rank() are displayed using args(). Setting rank()'s na.last argument to "keep" means "keep the rank of NA values as NA".
+
+Best practice for calling functions is to include them in the order shown by args(), and to only name common arguments.
+
+# Note the arguments to rank()
+args(rank)
+#args sirve para mirar el argumento de una función
+
+# Rewrite this function call, following best practices
+rank(-gold_medals, na.last = "keep", ties.method = "min")
+
+###Basics
+
+my_fun <- function(arg1, arg2) {
+	# Do something
+}
+
+1. Make a template 
+2. Paste in the script
+3. Choose the arguments
+4. Replace specific values with argument names
+5. Make specific variable names more general
+6. Remove a final assignment
+
+#####
+
+
+Your first function: tossing a coin
+
+Time to write your first function! It's a really good idea when writing functions to start simple. You can always make a function more complicated later if it's really necessary, so let's not worry about arguments for now.
+
+coin_sides <- c("head", "tail")
+
+# Sample from coin_sides once
+sample(coin_sides, size = 1)
+
+# Your functions, from previous steps
+toss_coin <- function() {
+  coin_sides <- c("head", "tail")
+  sample(coin_sides, 1)
+}
+
+# Call your function
+toss_coin()
+
+Inputs to functions
+
+Most functions require some sort of input to determine what to compute. The inputs to functions are called arguments. You specify them inside the parentheses after the word "function."
+
+coin_sides <- c("head", "tail")
+n_flips <- 10
+
+# Sample from coin_sides n_flips times with replacement
+sample(coin_sides, size = n_flips, replace = TRUE)
+
+# Update the function to return n coin tosses
+
+toss_coin <- function(n_flips) {
+  coin_sides <- c("head", "tail")
+  sample(coin_sides, size = n_flips, replace = TRUE)
+}
+
+# Generate 10 coin tosses
+toss_coin(10)
+
+Multiple inputs to functions
+
+If a function should have more than one argument, list them in the function signature, separated by commas.
+
+To solve this exercise, you need to know how to specify sampling weights to sample(). Set the prob argument to a numeric vector with the same length as x. Each value of prob is the probability of sampling the corresponding element of x, so their values add up to one. In the following example, each sample has a 20% chance of "bat", a 30% chance of "cat" and a 50% chance of "rat".
+
+sample(c("bat", "cat", "rat"), 10, replace = TRUE, prob = c(0.2, 0.3, 0.5))
+
+coin_sides <- c("head", "tail")
+n_flips <- 10
+p_head <- 0.8
+
+# Define a vector of weights
+weights <- c(p_head, 1 - p_head)
+
+# Update so that heads are sampled with prob p_head
+sample(coin_sides, n_flips, replace = TRUE, prob = weights)
+
+# Update the function so heads have probability p_head
+toss_coin <- function(n_flips, p_head) {
+  coin_sides <- c("head", "tail")
+  # Define a vector of weights
+  weights <- c(p_head, 1 - p_head)
+  # Modify the sampling to be weighted
+  sample(coin_sides, n_flips, replace = TRUE, prob = weights)
+}
+
+# Generate 10 coin tosses
+toss_coin(10, 0.8)
+
+Renaming GLM
+
+R's generalized linear regression function, glm(), suffers the same usability problems as lm(): its name is an acronym, and its formula and data arguments are in the wrong order.
+
+To solve this exercise, you need to know two things about generalized linear regression:
+
+    glm() formulas are specified like lm() formulas: response is on the left, and explanatory variables are added on the right.
+    To model count data, set glm()'s family argument to poisson, making it a Poisson regression.
+
+Here's you'll use data on the number of yearly visits to Snake River at Jackson Hole, Wyoming, snake_river_visits.
+
+snake_river_visits <- readRDS("~/snake_river_visits.rds")
+
+# Run a generalized linear regression 
+glm(
+  # Model no. of visits vs. gender, income, travel
+  n_visits ~ gender + income + travel, 
+  # Use the snake_river_visits dataset
+  data = snake_river_visits, 
+  # Make it a Poisson regression
+  family = poisson
+)
+
+# Write a function to run a Poisson regression
+run_poisson_regression <- function(data, formula) {
+	glm(formula, data, family = poisson)
+}
+
+# From previous step
+run_poisson_regression <- function(data, formula) {
+  glm(formula, data, family = poisson)
+}
+
+# Re-run the Poisson regression, using your function
+model <- snake_river_visits %>%
+  run_poisson_regression(n_visits ~ gender + income + travel)
+
+# Run this to see the predictions
+snake_river_explanatory %>%
+  mutate(predicted_n_visits = predict(model, ., type = "response"))%>%
+  arrange(desc(predicted_n_visits))
+
+######################################################################
+######################################################################
+######################################################################
+
+########  All about arguments   (Module 02-008)
+
+############### 1. defaults arguments
+
+Numeric defaults
+
+cut_by_quantile() converts a numeric vector into a categorical variable where quantiles define the cut points. This is a useful function, but at the moment you have to specify five arguments to make it work. This is too much thinking and typing.
+
+By specifying default arguments, you can make it easier to use. Let's start with n, which specifies how many categories to cut x into.
+
+A numeric vector of the number of visits to Snake River is provided as n_visits.
+
+# Set the default for n to 5
+cut_by_quantile <- function(x, n = 5, na.rm, labels, interval_type) {
+  probs <- seq(0, 1, length.out = n + 1)
+  qtiles <- quantile(x, probs, na.rm = na.rm, names = FALSE)
+  right <- switch(interval_type, "(lo, hi]" = TRUE, "[lo, hi)" = FALSE)
+  cut(x, qtiles, labels = labels, right = right, include.lowest = TRUE)
+}
+
+# Remove the n argument from the call
+cut_by_quantile(
+  n_visits, 
+  na.rm = FALSE, 
+  labels = c("very low", "low", "medium", "high", "very high"),
+  interval_type = "(lo, hi]"
+)
+
+Logical defaults
+
+cut_by_quantile() is now slightly easier to use, but you still always have to specify the na.rm argument. This removes missing values - it behaves the same as the na.rm argument to mean() or sd().
+
+Where functions have an argument for removing missing values, the best practice is to not remove them by default (in case you hadn't spotted that you had missing values). That means that the default for na.rm should be FALSE.
+
+# Set the default for na.rm to FALSE
+cut_by_quantile <- function(x, n = 5, na.rm = FALSE, labels, interval_type) {
+  probs <- seq(0, 1, length.out = n + 1)
+  qtiles <- quantile(x, probs, na.rm = na.rm, names = FALSE)
+  right <- switch(interval_type, "(lo, hi]" = TRUE, "[lo, hi)" = FALSE)
+  cut(x, qtiles, labels = labels, right = right, include.lowest = TRUE)
+}
+
+# Remove the na.rm argument from the call
+cut_by_quantile(
+  n_visits, 
+  labels = c("very low", "low", "medium", "high", "very high"),
+  interval_type = "(lo, hi]"
+)
+
+NULL defaults
+
+The cut() function used by cut_by_quantile() can automatically provide sensible labels for each category. The code to generate these labels is pretty complicated, so rather than appearing in the function signature directly, its labels argument defaults to NULL, and the calculation details are shown on the ?cut help page.
+
+# Set the default for labels to NULL
+cut_by_quantile <- function(x, n = 5, na.rm = FALSE, labels = NULL, interval_type) {
+  probs <- seq(0, 1, length.out = n + 1)
+  qtiles <- quantile(x, probs, na.rm = na.rm, names = FALSE)
+  right <- switch(interval_type, "(lo, hi]" = TRUE, "[lo, hi)" = FALSE)
+  cut(x, qtiles, labels = labels, right = right, include.lowest = TRUE)
+}
+
+# Remove the labels argument from the call
+cut_by_quantile(
+  n_visits,
+  interval_type = "(lo, hi]"
+  )
+
+Categorical defaults
+
+When cutting up a numeric vector, you need to worry about what happens if a value lands exactly on a boundary. You can either put this value into a category of the lower interval or the higher interval. That is, you can choose your intervals to include values at the top boundary but not the bottom (in mathematical terminology, "open on the left, closed on the right", or (lo, hi]). Or you can choose the opposite ("closed on the left, open on the right", or [lo, hi)). cut_by_quantile() should allow these two choices.
+
+The pattern for categorical defaults is:
+
+function(cat_arg = c("choice1", "choice2")) {
+  cat_arg <- match.arg(cat_arg)
+}
+
+Free hint: In the console, type head(rank) to see the start of rank()'s definition, and look at the ties.method argument.
+
+# Set the categories for interval_type to "(lo, hi]" and "[lo, hi)"
+cut_by_quantile <- function(x, n = 5, na.rm = FALSE, labels = NULL, 
+                            interval_type = c("(lo, hi]", "[lo, hi)")) {
+  # Match the interval_type argument
+  interval_type <- match.arg(interval_type)
+  probs <- seq(0, 1, length.out = n + 1)
+  qtiles <- quantile(x, probs, na.rm = na.rm, names = FALSE)
+  right <- switch(interval_type, "(lo, hi]" = TRUE, "[lo, hi)" = FALSE)
+  cut(x, qtiles, labels = labels, right = right, include.lowest = TRUE)
+}
+
+# Remove the interval_type argument from the call
+cut_by_quantile(n_visits)
+
+Clever categorical default setting! As a bonus, match.arg() handles throwing an error if the user types a value that wasn't specified. 
+
+###############################2. Passing arguments between functions
+
+Harmonic mean
+
+The harmonic mean is the reciprocal of the arithmetic mean of the reciprocal of the data. That is
+
+harmonic_mean(x)=1/arithmetic_mean(1/x)
+
+The harmonic mean is often used to average ratio data. You'll be using it on the price/earnings ratio of stocks in the Standard and Poor's 500 index, provided as std_and_poor500. Price/earnings ratio is a measure of how expensive a stock is.
+
+The dplyr package is loaded.
+
+STEP 01
+
+# Look at the Standard and Poor 500 data
+glimpse(std_and_poor500)
+
+# Write a function to calculate the reciprocal
+get_reciprocal <- function(x) {
+  1/x
+}
+get_reciprocal
+
+STEP 02
+
+# From previous step
+get_reciprocal <- function(x) {
+  1 / x
+}
+
+# Write a function to calculate the harmonic mean
+calc_harmonic_mean <- function(x) {
+  x %>%
+    get_reciprocal %>%
+    mean %>%
+    get_reciprocal
+}
+
+STEP 03
+
+# From previous steps
+get_reciprocal <- function(x) {
+  1 / x
+}
+calc_harmonic_mean <- function(x) {
+  x %>%
+    get_reciprocal() %>%
+    mean() %>%
+    get_reciprocal()
+}
+
+std_and_poor500 %>% 
+  # Group by sector
+  group_by(sector) %>% 
+  # Summarize, calculating harmonic mean of P/E ratio
+  summarize(hmean_pe_ratio = calc_harmonic_mean(pe_ratio))
+
+Dealing with missing values
+
+In the last exercise, many sectors had an NA value for the harmonic mean. It would be useful for your function to be able to remove missing values before calculating.
+
+Rather than writing your own code for this, you can outsource this functionality to mean().
+
+The dplyr package is loaded.
+
+# Add an na.rm arg with a default, and pass it to mean()
+calc_harmonic_mean <- function(x, na.rm = FALSE) {
+  x %>%
+    get_reciprocal() %>%
+    mean(na.rm = na.rm) %>%
+    get_reciprocal()
+}
+
+or
+
+# Add an na.rm arg with a default, and pass it to mean()
+calc_harmonic_mean <- function(x, ...) {
+  x %>%
+    get_reciprocal() %>%
+    mean(...) %>%
+    get_reciprocal()
+}
+
+STEP 02. Cambiando el argymento NA true
+
+# From previous step
+calc_harmonic_mean <- function(x, na.rm = FALSE) {
+  x %>%
+    get_reciprocal() %>%
+    mean(na.rm = na.rm) %>%
+    get_reciprocal()
+}
+
+std_and_poor500 %>% 
+  # Group by sector
+  group_by(sector) %>% 
+  # Summarize, calculating harmonic mean of P/E ratio
+ summarize(hmean_pe_ratio = calc_harmonic_mean(pe_ratio, na.rm = TRUE))
+ 
+ Passing arguments with ...
+
+Rather than explicitly giving calc_harmonic_mean() and na.rm argument, you can use ... to simply "pass other arguments" to mean().
+
+calc_harmonic_mean <- function(x, ...) {
+  x %>%
+    get_reciprocal() %>%
+    mean(...) %>%
+    get_reciprocal()
+}
+
+std_and_poor500 %>% 
+  # Group by sector
+  group_by(sector) %>% 
+  # Summarize, calculating harmonic mean of P/E ratio
+ summarize(hmean_pe_ratio = calc_harmonic_mean(pe_ratio, na.rm = TRUE))
+ 
+The dplyr package is loaded.
+
+#####
+
+______________________________
+
+x %>% 
+	log() %>% 
+	mean() %>% 
+	exp()
+
+set this into a function, you have tu pass the argument
+
+calc_geometric_mean <- function(x, na.rm = FALSE) {
+x %>% 
+	log() %>% 
+	mean(na.rm = na.rm) %>% 
+	exp()
+}
+____
+
+calc_geometric_mean <- function(x, ...) {
+x %>% 
+	log() %>% 
+	mean(...) %>% 
+	exp()
+}
+
+__________________________________________
+checking for arguments
+
+calc_geometric_mean <- function(x, ...) {
+if(!is.numeric(x)) {
+stop("x is not of class 'numeric'; it has class '", class(x), "'.")
+}
+x %>% 
+	log() %>% 
+	mean(...) %>% 
+	exp()
+}
+
+______
+Ckecking types of inputs
+assert package
+
+assert_is_numeric()
+assert_is_character()
+is_data.frame()
+...
+is_two_sided_formula()
+is_tskernel()
+_________________
+
+checking for arguments
+
+calc_geometric_mean <- function(x, ...) {
+
+assert_is_numeric(x)
+assert_all_are_positive(x)
+
+x %>% 
+	log() %>% 
+	mean(...) %>% 
+	exp()
+}
+
+__________________
+custom checks
+
+checking for arguments
+
+calc_geometric_mean <- function(x, ...) {
+
+assert_is_numeric(x)
+if(any(is_non_positive(x), na.rm = TRUE)) {
+	stop("x contains non-positive values, so the geometric mean makes no sense.")
+}
+
+x %>% 
+	log() %>% 
+	mean(...) %>% 
+	exp()
+}
+_____________________________________
+
+
+######
+
+Throwing errors with bad arguments
+
+If a user provides a bad input to a function, the best course of action is to throw an error letting them know. The two rules are
+
+    Throw the error message as soon as you realize there is a problem (typically at the start of the function).
+    Make the error message easily understandable.
+
+You can use the assert_*() functions from assertive to check inputs and throw errors when they fail.
+
+library(assertive)
+
+calc_harmonic_mean <- function(x, na.rm = FALSE) {
+  # Assert that x is numeric
+  assert_is_numeric(x)
+  x %>%
+    get_reciprocal() %>%
+    mean(na.rm = na.rm) %>%
+    get_reciprocal()
+}
+
+# See what happens when you pass it strings
+calc_harmonic_mean(std_and_poor500$sector)
+
+Custom error logic
+
+Sometimes the assert_*() functions in assertive don't give the most informative error message. For example, the assertions that check if a number is in a numeric range will tell the user that a value is out of range, but the won't say why that's a problem. In that case, you can use the is_*() functions in conjunction with messages, warnings, or errors to define custom feedback.
+
+The harmonic mean only makes sense when x has all positive values. (Try calculating the harmonic mean of one and minus one to see why.) Make sure your users know this!
+
+calc_harmonic_mean <- function(x, na.rm = FALSE) {
+  assert_is_numeric(x)
+  # Check if any values of x are non-positive
+  if(any(is_non_positive(x), na.rm = TRUE)) {
+    # Throw an error
+    stop("x contains non-positive values, so the harmonic mean makes no sense.")
+  }
+  x %>%
+    get_reciprocal() %>%
+    mean(na.rm = na.rm) %>%
+    get_reciprocal()
+}
+
+# See what happens when you pass it negative numbers
+calc_harmonic_mean(std_and_poor500$pe_ratio - 20)
+
+Fixing function arguments
+
+The harmonic mean function is almost complete. However, you still need to provide some checks on the na.rm argument. This time, rather than throwing errors when the input is in an incorrect form, you are going to try to fix it.
+
+na.rm should be a logical vector with one element (that is, TRUE, or FALSE).
+
+The assertive package is loaded for you.
+
+# Update the function definition to fix the na.rm argument
+calc_harmonic_mean <- function(x, na.rm = FALSE) {
+  assert_is_numeric(x)
+  if(any(is_non_positive(x), na.rm = TRUE)) {
+    stop("x contains non-positive values, so the harmonic mean makes no sense.")
+  }
+  # Use the first value of na.rm, and coerce to logical
+  na.rm <- coerce_to(use_first(na.rm), target_class = "logical")
+  x %>%
+    get_reciprocal() %>%
+    mean(na.rm = na.rm) %>%
+    get_reciprocal()
+}
+
+# See what happens when you pass it malformed na.rm
+calc_harmonic_mean(std_and_poor500$pe_ratio, na.rm = 1:5)
+
+######################################################################
+######################################################################
+######################################################################
+
+########  Return values and scope   (Module 03-008)
+
+Returning values from functions
+
+Returning values from functions
+
+Reason for returning early
+
+1. You already know the answer
+2. The input is an edge case.
+
+
+#Whitout
+simple_sum <- function(x) {
+	
+	total <- 0
+	 for(value in x) {
+	 total <- total + value
+	}
+	total
+}
+
+#With
+simple_sum <- function(x) {
+	
+	if(anyNA(x)) {
+	 return(NA)
+	}
+
+	total <- 0
+	 for(value in x) {
+	 total <- total + value
+	}
+	total
+}
+####
+
+
+calc_geometric_mean <- function(x, ...) {
+
+assert_is_numeric(x)
+if(any(is_non_positive(x), na.rm = TRUE)) {
+	warning("x contains non-positive values, so the geometric mean makes no sense.")
+	return(NaN)
+}
+na.rm <- coerce_to(use_first(na.rm), target_class = "logical")
+x %>% 
+	log() %>% 
+	mean(...) %>% 
+	exp()
+}
+
+##### Hiding the return value ---> useful for plot functions
+
+#With
+simple_sum <- function(x) {
+	
+	if(anyNA(x)) {
+	 return(NA)
+	}
+
+	total <- 0
+	 for(value in x) {
+	 total <- total + value
+	}
+	invisible(total)
+}
+
+Returning early
+
+Sometimes, you don't need to run through the whole body of a function to get the answer. In that case you can return early from that function using return().
+
+To check if x is divisible by n, you can use is_divisible_by(x, n) from assertive.
+
+Alternatively, use the modulo operator, %%. x %% n gives the remainder when dividing x by n, so x %% n == 0 determines whether x is divisible by n. Try 1:10 %% 3 == 0 in the console.
+
+To solve this exercise, you need to know that a leap year is every 400th year (like the year 2000) or every 4th year that isn't a century (like 1904 but not 1900 or 1905).
+
+assertive is loaded.
+
+is_leap_year <- function(year) {
+  # If year is div. by 400 return TRUE
+  if(year %% 400 == 0) {
+    return(TRUE)
+  }
+  # If year is div. by 100 return FALSE
+  if(year %% 100 == 0) {
+    return(FALSE)
+  }  
+  # If year is div. by 4 return TRUE
+  if(is_divisible_by(year, 4)) {
+    return(TRUE)
+  }
+  # Otherwise return FALSE
+  else {
+    return(FALSE)
+  }
+}
+
+Returning invisibly
+
+When the main purpose of a function is to generate output, like drawing a plot or printing something in the console, you may not want a return value to be printed as well. In that case, the value should be invisibly returned.
+
+The base R plot function returns NULL, since its main purpose is to draw a plot. This isn't helpful if you want to use it in piped code: instead it should invisibly return the plot data to be piped on to the next step.
+
+Recall that plot() has a formula interface (though the arguments are the wrong way round, like lm(), because the detail argument, formula, comes before the data argument.).
+
+plot(y ~ x, data = data)
+
+STEP 1
+
+# Using cars, draw a scatter plot of dist vs. speed
+plt_dist_vs_speed <- plot(dist ~ speed, data = cars)
+
+# Oh no! The plot object is NULL
+plt_dist_vs_speed
+
+STEP 2
+
+# Define a scatter plot fn with data and formula args
+pipeable_plot <- function(data, formula) {
+  # Call plot() with the formula interface
+  plot(formula, data = data)
+  # Invisibly return the input dataset
+  invisible(data)
+}
+
+# Draw the scatter plot of dist vs. speed again
+plt_dist_vs_speed <- cars %>% 
+  pipeable_plot(formula = dist ~ speed)
+
+# Now the plot object has a value
+plt_dist_vs_speed
+
+######################################################################
+
+Returning multiple values from functions
+
+R.version.string
+Sys.info()[c("sysname", "release")]
+loadedNamespaces()
+
+________________
+
+#ERROR
+session <- function() {
+	r_version <- R.version.string,
+	operating_system <- Sys.info()[c("sysname", "release")],
+	loaded_pkgs <- loadedNamespaces()
+	# ???
+} 
+
+#Defining session()
+session <- function() {
+	list(
+	r_version <- R.version.string,
+	operating_system <- Sys.info()[c("sysname", "release")],
+	loaded_pkgs <- loadedNamespaces()
+	)
+} 
+session()
+_______
+zeallot package
+install.package(zeallot)
+library(zeallot)
+c(vrsn, os, pkgs) %<-% session()
+
+### attributes
+
+month_no <- setNames(1:12, month.abb)
+month_no
+
+attributes(month_no)
+attr(month_no, "names")
+
+attr(month_no, "names") <- month.name
+month_no
+#names change to be the full month names
+
+Ex: dataframe
+orange_trees
+attributes(orange_trees)
+
+library(dplyr)
+orange_trees %>%
+	group_by(Tree) %>%
+	attributes()
+___________________
+excersice 
+broom package
+install.package(broom)
+library(broom)
+
+Model objects are converted into 3 data frames
+
+function/level/example
+
+glance()/model/degrees of freedom
+tidy()/coefficient/p-values
+augment()/observation/residuals
+
+
+Returning many things
+
+Functions can only return one value. If you want to return multiple things, then you can store them all in a list.
+
+If users want to have the list items as separate variables, they can assign each list element to its own variable using zeallot's multi-assignment operator, %<-%.
+
+glance(), tidy(), and augment() each take the model object as their only argument.
+
+The Poisson regression model of Snake River visits is available as model. broom and zeallot are loaded.
+
+library(zeallot)
+library(broom)
+
+STEP 01
+
+# Look at the structure of model (it's a mess!)
+str(model)
+
+# Use broom tools to get a list of 3 data frames
+list(
+  # Get model-level values
+  model = glance(model),
+  # Get coefficient-level values
+  coefficients = tidy(model),
+  # Get observation-level values
+  observations = augment(model)
+)
+
+STEP 02
+
+# Wrap this code into a function, groom_model
+groom_model <- function(model) {
+  list(
+    model = glance(model),
+    coefficients = tidy(model),
+    observations = augment(model)
+  )
+}
+formals(groom_model)
+
+# From previous step
+groom_model <- function(model) {
+  list(
+    model = glance(model),
+    coefficients = tidy(model),
+    observations = augment(model)
+  )
+}
+
+# Call groom_model on model, assigning to 3 variables
+c(mdl, cff, obs) %<-% groom_model(model)
+
+# See these individual variables
+mdl; cff; obs
+
+Returning metadata
+
+Sometimes you want the return multiple things from a function, but you want the result to have a particular class (for example, a data frame or a numeric vector), so returning a list isn't appropriate. This is common when you have a result plus metadata about the result. (Metadata is "data about the data". For example, it could be the file a dataset was loaded from, or the username of the person who created the variable, or the number of iterations for an algorithm to converge.)
+
+In that case, you can store the metadata in attributes. Recall the syntax for assigning attributes is as follows.
+
+attr(object, "attribute_name") <- attribute_value
+
+pipeable_plot <- function(data, formula) {
+  plot(formula, data)
+  # Add a "formula" attribute to data
+ attr(data, "formula") <- formula
+  invisible(data)
+}
+
+# From previous exercise
+plt_dist_vs_speed <- cars %>% 
+  pipeable_plot(dist ~ speed)
+
+# Examine the structure of the result
+str(plt_dist_vs_speed)
+
+################################################################################################################################################################################################################################################
+
+Environments
+
+Environments are like an special list
+
+#This is a list
+datacamp_lst <- list(
+name = "DataCamp"
+founding_year = 2003
+website = "https://www.datacamp.com"
+)
+ls.str(datacamp_lst)
+
+#Let's convert the list into an enviroment
+datacamp_env <- list2env(datacamp_lst)
+ls.str(datacamp_env)
+
+#Enviroment has a parents, like matroska dolls
+parent <- parent.env(datacamp_env)
+environmentName(parent)
+..."R_GlobalEnv"
+grandparent <- parent.env(parent)
+environmentName(grandparent)
+..."package:stats"
+
+search()
+###ex
+
+datacamp_lst <- list(
+name = "DataCamp"
+website = "https://www.datacamp.com"
+)
+datacamp_env <- list2env(datacamp_lst)
+founding_year <- 2013
+
+exists("founding_year", envir = datacamp_env)
+...TRUE
+
+if the envieroment doesn't have the question{
+then will ask the parent, then the grandparent
+and so.. util it find it
+
+if you don't want "exist" function to be
+so greedy you put inherits = FALSE
+
+exists("founding_year", envir = datacamp_env, inherits = FALSE)
+
+if the envieroment doesn't have the question{
+then will ask the parent, then the grandparent
+and so.. util it find it
+
+if you don't want "exist" function to be
+so greedy you put inherits = FALSE
+
+exist("founding_year", envir = datacamp_env, inherits = FALSE)
+
+####
+
+Creating and exploring environments
+
+Environments are used to store other variables. Mostly, you can think of them as lists, but there's an important extra property that is relevant to writing functions. Every environment has a parent environment (except the empty environment, at the root of the environment tree). This determines which variables R know about at different places in your code.
+
+Facts about the Republic of South Africa are contained in capitals, national_parks, and population.
+
+STEP 01
+
+# Add capitals, national_parks, & population to a named list
+rsa_lst <- list(
+  capitals = capitals,
+  national_parks = national_parks,
+  population = population
+)
+
+# List the structure of each element of rsa_lst
+ls.str(rsa_lst)
+
+STEP 02
+
+# From previous step
+rsa_lst <- list(
+  capitals = capitals,
+  national_parks = national_parks,
+  population = population
+)
+
+# Convert the list to an environment
+rsa_env <- list2env(rsa_lst)
+
+# List the structure of each variable
+ls.str(rsa_env)
+
+STEP 03
+
+# From previous steps
+rsa_lst <- list(
+  capitals = capitals,
+  national_parks = national_parks,
+  population = population
+)
+rsa_env <- list2env(rsa_lst)
+
+# Find the parent environment of rsa_env
+parent <- parent.env(rsa_env)
+
+# Print its name
+environmentName(parent)
+
+Do variables exist?
+
+If R cannot find a variable in the current environment, it will look in the parent environment, then the grandparent environment, and so on until it finds it.
+
+rsa_env has been modified so it includes capitals and national_parks, but not population.
+
+# Compare the contents of the global environment and rsa_env
+ls.str(globalenv())
+ls.str(rsa_env)
+
+# Does population exist in rsa_env?
+exists("population", envir = rsa_env)
+
+# Does population exist in rsa_env, ignoring inheritance?
+exists("population", envir = rsa_env, inherits = FALSE)
+
+########################
+########################
+########################
+########################
+
+#Ex
+x_times_7 <- function(x) {
+	x * y
+}
+x_times_y(10)
+!!!ERROR NO Y arg
+# we defined y outside the function
+x_times_7 <- function(x) {
+	x * y
+}
+y <- 4 
+x_times_y(10)
+40
+# when it doesn't found the y in the 
+function env, it look in the parent env
+#continue ex
+print(x)
+!!!Error, x it search in parentenv, so x is a child,
+ and ypu can look inside the funcitoon env from putside
+#continue ex
+x_times_7 <- function(x) {
+	y <- 6
+	x + y
+}
+y <- 4 
+x_times_y(10)
+16
+
+#continue ex
+x_times_7 <- function(x) {
+	x <- 9
+	y <- 6
+	x + y
+}
+y <- 4 
+x_times_y(10)
+15
+
+######################################################################
+######################################################################
+######################################################################
+
+########  Case study on grain yields   (Module 04-008)
+
+
+magrittr's pipeable operators replacement
+operator //	Functional alternative
+x * y //	x %>% multiply_by(y)
+x ^ y //	x %>% raise_to_power(y)
+x[y] // 	x %>% extract(y)
+
+magrittr packages
+install.packages(magrittr)
+library(magrittr)
+
+Converting areas to metric 1
+
+In this chapter, you'll be working with grain yield data from the United States Department of Agriculture, National Agricultural Statistics Service. Unfortunately, they report all areas in acres. So, the first thing you need to do is write some utility functions to convert areas in acres to areas in hectares.
+
+To solve this exercise, you need to know the following:
+
+    There are 4840 square yards in an acre.
+    There are 36 inches in a yard and one inch is 0.0254 meters.
+    There are 10000 square meters in a hectare.
+
+STEP 01
+
+# Write a function to convert acres to sq. yards
+acres_to_sq_yards <- function(acres) {
+  acres * 4840
+}
+
+STEP 02
+
+# Write a function to convert yards to meters
+yards_to_meters <- function(yards) {
+  yards * 36 * 0.0254
+}
+
+STEP 03
+
+# Write a function to convert sq. meters to hectares
+sq_meters_to_hectares <- function(sq_meters) {
+  sq_meters / 10000
+}
+
+Converting areas to metric 2
+
+You're almost there with creating a function to convert acres to hectares. You need another utility function to deal with getting from square yards to square meters. Then, you can bring everything together to write the overall acres-to-hectares conversion function. Finally, in the next exercise you'll be calculating area conversions in the denominator of a ratio, so you'll need a harmonic acre-to-hectare conversion function.
+
+Free hints: magrittr's raise_to_power() will be useful here. The last step is similar to Chapter 2's Harmonic Mean.
+
+The three utility functions from the last exercise (acres_to_sq_yards(), yards_to_meters(), and sq_meters_to_hectares()) are available, as is your get_reciprocal() from Chapter 2. magrittr is loaded.
+
+STEP 01
+
+# Write a function to convert sq. yards to sq. meters
+sq_yards_to_sq_meters <- function(sq_yards) {
+  sq_yards %>%
+    # Take the square root
+    sqrt() %>%
+    # Convert yards to meters
+    yards_to_meters() %>%
+    # Square it
+    raise_to_power(2)
+}
+
+STEP 02
+
+# Write a function to calculate the reciprocal
+get_reciprocal <- function(x) {
+  1/x
+}
+get_reciprocal
+
+# Load the function from the previous step
+load_step2()
+
+# Write a function to convert acres to hectares
+acres_to_hectares <- function(sq_yards) {
+  sq_yards %>%
+    # Convert acres to sq yards
+    acres_to_sq_yards() %>%
+    # Convert sq yards to sq meters
+    sq_yards_to_sq_meters() %>%
+    # Convert sq meters to hectares
+    sq_meters_to_hectares()
+}
+
+STEP 03
+
+# Load the functions from the previous steps
+load_step3()
+
+# Define a harmonic acres to hectares function
+harmonic_acres_to_hectares <- function(acres) {
+  acres %>% 
+    # Get the reciprocal
+    get_reciprocal %>%
+    # Convert acres to hectares
+    acres_to_hectares %>% 
+    # Get the reciprocal again
+    get_reciprocal
+}
+
+Converting yields to metric
+
+The yields in the NASS corn data are also given in US units, namely bushels per acre. You'll need to write some more utility functions to convert this unit to the metric unit of kg per hectare.
+
+Bushels historically meant a volume of 8 gallons, but in the context of grain, they are now defined as masses. This mass differs for each grain! To solve this exercise, you need to know these facts.
+
+    One pound (lb) is 0.45359237 kilograms (kg).
+    One bushel is 48 lbs of barley, 56 lbs of corn, or 60 lbs of wheat.
+
+magrittr is loaded.
+
+STEP 01
+
+# Write a function to convert lb to kg
+lbs_to_kgs <- function(lbs) {
+  lbs * 0.45359237
+}
+
+STEP 02
+
+# Write a function to convert bushels to lbs
+bushels_to_lbs <- function(bushels, crop) {
+  # Define a lookup table of scale factors
+  c(barley = 48, corn = 56, wheat = 60) %>%
+    # Extract the value for the crop
+    extract(crop) %>%
+    # Multiply by the no. of bushels
+    multiply_by(bushels)
+}
+
+STEP 03
+
+# Load fns defined in previous steps
+load_step3()
+
+# Write a function to convert bushels to kg
+bushels_to_kgs <- function(bushels, crop) {
+  bushels %>%
+    # Convert bushels to lbs for this crop
+    bushels_to_lbs(crop) %>%
+    # Convert lbs to kgs
+    lbs_to_kgs()
+}
+
+STEP 4
+
+# Load fns defined in previous steps
+load_step4()
+
+# Write a function to convert bushels/acre to kg/ha
+bushels_per_acre_to_kgs_per_hectare <- function(bushels_per_acre, crop = c("barley", "corn", "wheat")) {
+  # Match the crop argument
+  crop <- match.arg(crop)
+  bushels_per_acre %>%
+    # Convert bushels to kgs for this crop
+    bushels_to_kgs(crop) %>%
+    # Convert harmonic acres to ha
+    harmonic_acres_to_hectares()
+}
+
+Applying the unit conversion
+
+Now that you've written some functions, it's time to apply them! The NASS corn dataset is available, and you can fortify it (jargon for "adding new columns") with metrics areas and yields.
+
+This fortification process can also be turned in to a function, so you'll define a function for this, and test it on the NASS wheat dataset.
+
+STEP 01
+
+# View the corn 
+corn <- nass.corn
+glimpse(corn)
+
+corn %>%
+  # Add some columns
+  mutate(
+    # Convert farmed area from acres to ha
+    farmed_area_ha = acres_to_hectares(farmed_area_acres),
+    # Convert yield from bushels/acre to kg/ha
+    yield_kg_per_ha = bushels_per_acre_to_kgs_per_hectare(
+      bushels_per_acre <- yield_bushels_per_acre,
+      crop = "corn"
+    )
+  )
+  
+STEP 02
+
+# Wrap this code into a function
+fortify_with_metric_units <- function(data, crop) {
+  data %>%
+    mutate(
+      farmed_area_ha = acres_to_hectares(farmed_area_acres),
+      yield_kg_per_ha = bushels_per_acre_to_kgs_per_hectare(
+        yield_bushels_per_acre, 
+        crop = crop
+      )
+    )
+}
+
+# Try it on the wheat dataset
+fortify_with_metric_units(wheat, crop = "wheat")
+
+######################
+
+remind of ggplot2
+
+ggplot(dataset, aes(x, y)) + geom_line(aes(group = group))
+
+ggplot(dataset, aes(x, y)) + geom_line(aes(group = group)) + geom_smooth()
+
+ggplot(dataset, aes(x, y)) + geom_line(aes(group = group)) + geom_smooth() + facet_wrap(vars(facet))
+
+remind of dplyr
+
+dataset1 %>% 
+	inner_join(dataset2, by = "column_to_join_on")
+	
+	Plotting yields over time
+
+Now that the units have been dealt with, it's time to explore the datasets. An obvious question to ask about each crop is, "how do the yields change over time in each US state?" Let's draw a line plot to find out!
+
+ggplot2 is loaded, and corn and wheat datasets are available with metric units.
+
+library(ggplot2)
+wheat <- nass.wheat
+barley <- nass.barley
+
+STEP 01
+
+# Using corn, plot yield (kg/ha) vs. year
+ggplot(corn, aes(year, yield_kg_per_ha)) +
+  # Add a line layer, grouped by state
+  geom_line(aes(group = state)) +
+  # Add a smooth trend layer
+  geom_smooth()
+
+STEP 02
+
+# Wrap this plotting code into a function
+plot_yield_vs_year <- function(data){
+  ggplot(data, aes(year, yield_kg_per_ha)) +
+    geom_line(aes(group = state)) +
+    geom_smooth()
+}
+
+# Test it on the wheat dataset
+plot_yield_vs_year(wheat)
+
+A nation divided
+
+The USA has a varied climate, so we might expect yields to differ between states. Rather than trying to reason about 50 states separately, we can use the USA Census Regions to get 9 groups.
+
+The "Corn Belt", where most US corn is grown is in the "West North Central" and "East North Central" regions. The "Wheat Belt" is in the "West South Central" region.
+
+dplyr is loaded, the corn and wheat datasets are available, as is usa_census_regions.
+
+STEP 01
+
+# Inner join the corn dataset to usa_census_regions by state
+corn %>%
+  inner_join(usa_census_regions, by = "state")
+
+STEP 02
+
+# Inner join the corn dataset to usa_census_regions by state
+fortify_with_census_region <- function(data) {
+data %>%
+  inner_join(usa_census_regions, by = "state")
+}
+fortify_with_census_region (wheat)
+
+Plotting yields over time by region
+
+So far, you have a function to plot yields over time for each crop, and you've added a census_region column to the crop datasets. Now you are ready to look at how the yields change over time in each region of the USA.
+
+ggplot2 is loaded. corn and wheat have been fortified with census regions. plot_yield_vs_year() is available.
+
+STEP 01
+
+# Plot yield vs. year for the corn dataset
+plot_yield_vs_year(corn) +
+  # Facet, wrapped by census region
+  facet_wrap(vars(census_region))
+  
+STEP 02
+
+# Wrap this code into a function
+plot_yield_vs_year_by_region <- function(data) {
+  plot_yield_vs_year(data) +
+    facet_wrap(vars(census_region))
+}
+
+# Try it on the wheat dataset
+plot_yield_vs_year_by_region(wheat)
+
+______________________________
+############################
+############################
+############################
+############################
+
+Modeling grain yields
+#Run a model and make prediction
+
+lines are not straight--> we need a non-linear model
+generalized models (gams)
+
+linear model vs. generalized additive models
+
+###A linear model
+
+lm(
+	response_var ~ explanatory_var1 + explanatory_var2,
+	data = dataset
+)
+
+###A generalized additive model (gams)
+
+library(mgcv)
+gam(
+	response_var ~ s(explanatory_var1) + explanatory_var2,
+	data = dataset
+)	
+
+### To create a Data frame of model predictions there are 3 steps
+
+Predicting GAMs
+
+To create a dataframe of model predictions there are 3 steps
+
+STEP 01
+predict_this <- data.frame(
+	explanatory_var1 = c("some", "values")
+	explanatory_var2 = c("more", "values")
+)
+
+STEP 02
+predicted_responses <- predict(model, predict_this, type = "response")
+
+#the prediction results is use to come out as a vector, but for utility reasons is usufull to store it as a vector
+
+STEP 03
+predict_this %>%
+	mutate(predicted_responses = predicted_responses)
+
+Running a model
+
+The smooth trend line you saw in the plots of yield over time use a generalized additive model (GAM) to determine where the line should lie. This sort of model is ideal for fitting nonlinear curves. So we can make predictions about future yields, let's explicitly run the model. The syntax for running this GAM takes the following form.
+
+gam(response ~ s(explanatory_var1) + explanatory_var2, data = dataset)
+
+Here, s() means "make the variable smooth", where smooth very roughly means nonlinear.
+
+mgcv and dplyr are loaded; the corn and wheat datasets are available.
+
+STEP 01
+
+# Run a generalized additive model of 
+# yield vs. smoothed year and census region
+gam(yield_kg_per_ha ~ s(year) + census_region, data = corn)
+
+STEP 02
+
+# Wrap the model code into a function
+run_gam_yield_vs_year_by_region <- function(data) {
+  gam(yield_kg_per_ha ~ s(year) + census_region, data = data)
+}
+# Try it on the wheat dataset
+run_gam_yield_vs_year_by_region(wheat)
+
+Making yield predictions
+
+The fun part of modeling is using the models to make predictions. You can do this using a call to predict(), in the following form.
+
+predict(model, cases_to_predict, type = "response")
+
+mgcv and dplyr are loaded; GAMs of the corn and wheat datasets are available as corn_model and wheat_model. A character vector of census regions is stored as census_regions.
+
+STEP 01
+
+# Make predictions in 2050  
+predict_this <- data.frame(
+  year = 2050,
+  census_region = census_regions
+) 
+
+# Predict the yield
+pred_yield_kg_per_ha <- predict(corn_model, predict_this, type = "response")
+
+predict_this %>%
+  # Add the prediction as a column of predict_this 
+  mutate(pred_yield_kg_per_ha = pred_yield_kg_per_ha)
+
+STEP 02
+
+# Wrap this prediction code into a function
+predict_yields <- function(model, year) {
+  predict_this <- data.frame(
+    year = year,
+    census_region = census_regions
+  ) 
+  pred_yield_kg_per_ha <- predict(model, predict_this, type = "response")
+  predict_this %>%
+    mutate(pred_yield_kg_per_ha = pred_yield_kg_per_ha)
+}
+
+# Try it on the wheat dataset
+predict_yields(wheat_model, year = 2050)
+
+Do it all over again
+
+Hopefully, by now, you've realized that the real benefit to writing functions is that you can reuse your code easily. Now you are going to rerun the whole analysis from this chapter on a new crop, barley. Since all the infrastructure is in place, that's less effort than it sounds!
+
+Barley prefers a cooler climate compared to corn and wheat and is commonly grown in the US mountain states of Idaho and Montana.
+
+dplyr and ggplot2, and mgcv are loaded; fortify_with_metric_units(), fortify_with_census_region(), plot_yield_vs_year_by_region(), run_gam_yield_vs_year_by_region(), and predict_yields() are available.
+
+STEP 01
+
+fortified_barley <- barley %>% 
+  # Fortify with metric units
+  fortify_with_metric_units() %>%
+  # Fortify with census regions
+  fortify_with_census_region()
+
+# See the result
+glimpse(fortified_barley)
+
+STEP 02
+
+# From previous step
+fortified_barley <- barley %>% 
+  fortify_with_metric_units() %>%
+  fortify_with_census_region()
+
+# Plot yield vs. year by region
+plot_yield_vs_year_by_region(fortified_barley)
+
+STEP 03
+
+# From previous step
+fortified_barley <- barley %>% 
+  fortify_with_metric_units() %>%
+  fortify_with_census_region()
+
+fortified_barley %>% 
+  # Run a GAM of yield vs. year by region
+  run_gam_yield_vs_year_by_region()  %>% 
+  # Make predictions of yields in 2050
+  predict_yields(year = 2050)
+  
+  END

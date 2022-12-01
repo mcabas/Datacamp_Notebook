@@ -1,0 +1,880 @@
+######################################################################
+######################################################################
+######################################################################
+
+# COURSE Unsupervised Learning in R_021
+
+######################################################################
+######################################################################
+######################################################################
+
+######## Unsupervised learning in R (Module 01-021)
+######################################################################
+
+# 	Types of machine learning 
+
+1. Unsupervised learning 
+
+	- Finding structure in unlabeled data
+	(unlabel data is data without a target, 
+	 without a clear response variable)
+
+2. Supervised learning
+
+	- Making predictions based on labeled data (data with a target)
+	- Predictions like regression or classi???cation
+	(regression to say or predict what something is or could be)
+	(classificarion to say or predict what type or class something 
+	 is or could be)
+
+3. Reinforcement learning
+
+	-Computers learn for feedback and they're operating in real or
+	 syntetic enviroment
+
+# 	Labeled vs. unlabeled data
+
+If we had observation whithout labels, then we have unlabeled data
+
+If we had observarions that are a part of one of two groups,
+then we have label data
+
+# 	Unsupervised learning 
+
+With unsupervised learning we have varios goals
+
+1. Finding homogenous subgroups within larger group
+	-1.1. Clustering
+
+2. Finding paterns in the features of the data
+	-2.1. Dimensionality reduction
+	(DR is a method to reduce the numbers of features to
+	 describe an observation, while manteining the maximum
+	 information content under the contrains of low dimendionality)
+
+#	 Dimensionality reduction (utilities of DR)
+
+1. Find paterns in the features of the data 
+2. Visualization of high dimensional data 
+3. Pre-processing before supervised learning
+
+#	Challenges and bene???t
+
+-	No single goal of analysis 
+(someone ask you: FIND SOME PATTERNS IN THE DATA!!!)
+-	Requires more creativity   
+(Requires more creativity to decide how to proceed in analisys)
+-	Much more unlabeled data available than cleanly labeled data
+(It is more common to encounter unlabelled data, so it is more probably to have to applied unsupervise methods)
+
+#---------------------------------------------------------------------
+
+# Introduction to k-means clustering
+
+k-means clustering algorithm
+(Is an algorithm used to fin homogeneus groups in between a population)
+	- First of two clustering algorithms covered in this course 
+
+	- Breaks observations into pre-de???ned number of clusters
+(k- means works by first assuming the number of sub-groups or clusters in the data
+and then asing each observation to one or other subgroup)
+
+k-means in R
+
+	# k-means algorithm with 5 centers, run 20 times
+	kmeans(x, centers = 5, nstart = 20)
+
+	x is the data
+	center is the number of predetermined groups or clusters
+	nstart (the random component, k-means can be runed a multiples of times
+	and to obtain the best outcome, and this one is selected as the only 
+	single outcome) so.. nstart is the parameter that set the number of times
+	kmeans can be repeated
+
+- One observation per row, one feature per column 
+- k-means has a random component 
+- Run algorithm multiple times to improve odds of the best model
+
+#---------------------------------------------------------------------
+
+k-means clustering
+
+We have created some two-dimensional data and stored it in a variable called x in your workspace. The scatter plot on the right is a visual representation of the data.
+
+In this exercise, your task is to create a k-means model of the x data using 3 clusters, then to look at the structure of the resulting model using the summary() function.
+
+# Create the k-means model: km.out
+km.out <- kmeans(x, centers = 3, nstart = 20)
+
+# Inspect the result
+summary(km.out)
+
+#---------------------------------------------------------------------
+
+Results of kmeans()
+
+The kmeans() function produces several outputs. In the video, we discussed one output of modeling, the cluster membership.
+
+In this exercise, you will access the cluster component directly. This is useful anytime you need the cluster membership for each observation of the data used to build the clustering model. A future exercise will show an example of how this cluster membership might be used to help communicate the results of k-means modeling.
+
+k-means models also have a print method to give a human friendly output of basic modeling results. This is available by using print() or simply typing the name of the model.
+
+# Print the cluster membership component of the model
+print(km.out$cluster)
+
+# Print the km.out object
+print(km.out)
+
+#---------------------------------------------------------------------
+
+Visualizing and interpreting results of kmeans()
+
+One of the more intuitive ways to interpret the results of k-means models is by plotting the data as a scatter plot and using color to label the samples' cluster membership. In this exercise, you will use the standard plot() function to accomplish this.
+
+To create a scatter plot, you can pass data with two features (i.e. columns) to plot() with an extra argument col = km.out$cluster, which sets the color of each point in the scatter plot according to its cluster membership.
+
+# Scatter plot of x
+plot(x, 
+  col = km.out$cluster, 
+  main = "k-means with 3 clusters",
+  xlab = "", ylab = "")
+  
+#---------------------------------------------------------------------
+
+# How kmeans() works and practical matters
+
+Objectives
+- Explain how k-means algorithm is implemented visually 
+- Model selection: determining number of clusters
+ 
+# Model selection 
+
+1.  Recall k-means has a random component 
+2.  Best outcome is based on total within cluster sum of squares: 
+    - For each cluster
+	- For each observation in the cluster 
+		- Determine squared distance from observation to cluster center 
+	- Sum all of them together
+
+	# k-means algorithm with 5 centers, run 20 times
+	kmeans(x, centers = 5, nstart = 20
+3.  Running algorithm multiple times helps ???nd the global minimum total within cluster sum of squares 
+
+# Determining number of clusters 
+
+Trial and error is not the best approach
+You can do it with Scree plot "elbow plot"
+
+#---------------------------------------------------------------------
+
+Handling random algorithms
+
+In the video, you saw how kmeans() randomly initializes the centers of clusters. This random initialization can result in assigning observations to different cluster labels. Also, the random initialization can result in finding different local minima for the k-means algorithm. This exercise will demonstrate both results.
+
+At the top of each plot, the measure of model quality-total within cluster sum of squares error-will be plotted. Look for the model(s) with the lowest error to find models with the better model results.
+
+Because kmeans() initializes observations to random clusters, it is important to set the random number generator seed for reproducibility.
+
+# Set up 2 x 3 plotting grid
+par(mfrow = c(2, 3))
+
+# Set seed
+set.seed(1)
+
+for(i in 1:6) {
+  # Run kmeans() on x with three clusters and one start
+  km.out <- kmeans(x, centers = 3, nstart = 1)
+  
+  # Plot clusters
+  plot(x, col = km.out$cluster, 
+       main = km.out$tot.withinss, 
+       xlab = "", ylab = "")
+}
+
+#---------------------------------------------------------------------
+
+Selecting number of clusters
+
+The k-means algorithm assumes the number of clusters as part of the input. If you know the number of clusters in advance (e.g. due to certain business constraints) this makes setting the number of clusters easy. However, as you saw in the video, if you do not know the number of clusters and need to determine it, you will need to run the algorithm multiple times, each time with a different number of clusters. From this, you can observe how a measure of model quality changes with the number of clusters.
+
+In this exercise, you will run kmeans() multiple times to see how model quality changes as the number of clusters changes. Plots displaying this information help to determine the number of clusters and are often referred to as scree plots.
+
+The ideal plot will have an elbow where the quality measure improves more slowly as the number of clusters increases. This indicates that the quality of the model is no longer improving substantially as the model complexity (i.e. number of clusters) increases. In other words, the elbow indicates the number of clusters inherent in the data.
+
+# Initialize total within sum of squares error: wss
+wss <- 0
+
+# For 1 to 15 cluster centers
+for (i in 1:15) {
+  km.out <- kmeans(x, centers = i, nstart = 20)
+  # Save total within sum of squares to wss variable
+  wss[i] <- km.out$tot.withinss
+}
+
+# Plot total within sum of squares vs. number of clusters
+plot(1:15, wss, type = "b", 
+     xlab = "Number of Clusters", 
+     ylab = "Within groups sum of squares")
+
+# Set k equal to the number of clusters corresponding to the elbow location
+k <- 2# Initialize total within sum of squares error: wss
+wss <- 0
+
+# For 1 to 15 cluster centers
+for (i in 1:15) {
+  km.out <- kmeans(x, centers = i, nstart = 20)
+  # Save total within sum of squares to wss variable
+  wss[i] <- km.out$tot.withinss
+}
+
+# Plot total within sum of squares vs. number of clusters
+plot(1:15, wss, type = "b", 
+     xlab = "Number of Clusters", 
+     ylab = "Within groups sum of squares")
+
+# Set k equal to the number of clusters corresponding to the elbow location
+k <- 2# Initialize total within sum of squares error: wss
+wss <- 0
+
+# For 1 to 15 cluster centers
+for (i in 1:15) {
+  km.out <- kmeans(x, centers = i, nstart = 20)
+  # Save total within sum of squares to wss variable
+  wss[i] <- km.out$tot.withinss
+}
+
+# Plot total within sum of squares vs. number of clusters
+plot(1:15, wss, type = "b", 
+     xlab = "Number of Clusters", 
+     ylab = "Within groups sum of squares")
+
+# Set k equal to the number of clusters corresponding to the elbow location
+k <- 2
+
+#---------------------------------------------------------------------
+
+Practical matters: working with real data
+
+Dealing with real data is often more challenging than dealing with synthetic data. Synthetic data helps with learning new concepts and techniques, but the next few exercises will deal with data that is closer to the type of real data you might find in your professional or academic pursuits.
+
+The first challenge with the Pokemon data is that there is no pre-determined number of clusters. You will determine the appropriate number of clusters, keeping in mind that in real data the elbow in the scree plot might be less of a sharp elbow than in synthetic data. Use your judgement on making the determination of the number of clusters.
+
+The second part of this exercise includes plotting the outcomes of the clustering on two dimensions, or features, of the data. These features were chosen somewhat arbitrarily for this exercise. Think about how you would use plotting and clustering to communicate interesting groups of Pokemon to other people.
+
+An additional note: this exercise utilizes the iter.max argument to kmeans(). As you've seen, kmeans() is an iterative algorithm, repeating over and over until some stopping criterion is reached. The default number of iterations for kmeans() is 10, which is not enough for the algorithm to converge and reach its stopping criterion, so we'll set the number of iterations to 50 to overcome this issue. To see what happens when kmeans() does not converge, try running the example with a lower number of iterations (e.g. 3). This is another example of what might happen when you encounter real data and use real cases.
+
+pokemon <- read.csv("https://assets.datacamp.com/production/course_6430/datasets/Pokemon.csv")
+
+pokemonE <- pokemon[, 6:11]
+
+# Initialize total within sum of squares error: wss
+wss <- 0
+
+# Look over 1 to 15 possible clusters
+for (i in 1:15) {
+  # Fit the model: km.out
+  km.out <- kmeans(pokemonE, centers = i, nstart = 20, iter.max = 50)
+  # Save the within cluster sum of squares
+  wss[i] <- km.out$tot.withinss
+}
+
+# Produce a scree plot
+plot(1:15, wss, type = "b", 
+     xlab = "Number of Clusters", 
+     ylab = "Within groups sum of squares")
+
+# Select number of clusters
+k <- 4
+
+# Build model with k clusters: km.out
+km.out <- kmeans(pokemonE, centers = 4, nstart = 20, iter.max = 50)
+
+# View the resulting model
+km.out
+
+# Plot of Defense vs. Speed by cluster membership
+plot(pokemonE[, c("Defense", "Speed")],
+     col = km.out$cluster,
+     main = paste("k-means clustering of Pokemon with", k, "clusters"),
+     xlab = "Defense", ylab = "Speed")
+
+######################################################################
+######################################################################
+######################################################################
+
+######## Hierarchical clustering   (Module 02-021)
+######################################################################
+
+##Introduction to hierarchical clustering
+
+Hierarchical clustering
+-  Number of clusters is not known ahead of time
+-  Two kinds: bottom-up and top-down, this course bottom-up
+
+#Hierarchical clustering in R
+
+# Calculates similarity as Euclidean distance between observations 
+dist_matrix <- dist(x) 
+# Returns hierarchical clustering model > hclust(d = dist_matrix)
+ 
+Call: 
+hclust(d = s) 
+Cluster method   : complete  
+Distance         : euclidean  
+Number of objects: 50
+
+#---------------------------------------------------------------------
+
+Hierarchical clustering with results
+
+In this exercise, you will create your first hierarchical clustering model using the hclust() function.
+
+We have created some data that has two dimensions and placed it in a variable called x. Your task is to create a hierarchical clustering model of x. Remember from the video that the first step to hierarchical clustering is determining the similarity between observations, which you will do with the dist() function.
+
+You will look at the structure of the resulting model using the summary() function.
+
+# Create hierarchical clustering model: hclust.out
+hclust.out <- hclust(dist(x))
+
+# Inspect the result
+summary(hclust.out)
+
+#---------------------------------------------------------------------
+
+##Selecting number of clusters
+
+# Create hierarchical cluster model: hclust.out 
+hclust.out <- hclust(dist(x)) 
+
+# Inspect the result 
+summary(hclust.out)    # Information isn't particularly useful
+
+# Dendrogram
+- Tree shaped structure used to interpret hierarchical clustering models
+# Dendrogram plotting in R
+
+# Draws a dendrogram
+plot(hclust.out)
+abline(h = 6, col = "red")
+
+# Tree 'cutting' in R 
+# Cut by height h 
+cutree(hclust.out, h = 6) 
+# Cut by number of clusters k
+cutree(hclust.out, k = 2)
+
+#---------------------------------------------------------------------
+
+Cutting the tree
+
+Remember from the video that cutree() is the R function that cuts a hierarchical model. The h and k arguments to cutree() allow you to cut the tree based on a certain height h or a certain number of clusters k.
+
+In this exercise, you will use cutree() to cut the hierarchical model you created earlier based on each of these two criteria.
+
+# Cut by height
+cutree(hclust.out, h = 7) 
+
+# Cut by number of clusters
+cutree(hclust.out, k = 3)
+
+#---------------------------------------------------------------------
+
+## Clustering linkage and practical matters
+
+# Linking clusters in hierarchical clustering
+-  How is distance between clusters determined? Rules?
+-  Four methods to determine which cluster should be linked
+	- Complete: pairwise similarity between all observations in cluster 1 and 	cluster 2, and uses largest of similarities
+	- Single: same as above but uses smallest of similarities
+	- Average: same as above but uses average of similarities
+	- Centroid: ???nds centroid of cluster 1 and centroid of cluster 2, and uses 	similarity between two centroids
+
+# Linkage in R
+# Fitting hierarchical clustering models using different methods
+hclust.complete <- hclust(d, method = "complete")
+hclust.average <- hclust(d, method = "average")
+hclust.single <- hclust(d, method = "single")
+
+# Practical matters
+- Data on di???erent scales can cause undesirable results in clustering methods
+- Solution is to scale data so that features have same mean and standard deviation
+	- Subtract mean of a feature from all observations
+	- Divide each feature by the standard deviation of the feature
+	- Normalized features have a mean of zero and a standard deviation of one
+
+# Practical matters
+# Check if scaling is necessary 
+colMeans(x) # x is a data matrix
+[1] -0.1337828  0.0594019 
+
+apply(x, 2, sd) 
+[1] 1.974376 2.112357 
+
+# Produce new matrix with columns of mean of 0 and sd of 1 
+scaled_x <- scale(x) 
+
+colMeans(scaled_x) 
+[1] 2.775558e-17 3.330669e-17 
+apply(scaled_x, 2, sd) 
+[1] 1 1
+
+# Normalized features have mean of 0 and standard deviation of 1
+
+#---------------------------------------------------------------------
+
+Linkage methods
+
+In this exercise, you will produce hierarchical clustering models using different linkages and plot the dendrogram for each, observing the overall structure of the trees.
+
+You'll be asked to interpret the results in the next exercise.
+
+# Cluster using complete linkage: hclust.complete
+hclust.complete <- hclust(dist(x), method = "complete")
+
+# Cluster using average linkage: hclust.average
+hclust.average <- hclust(dist(x), method = "average")
+
+# Cluster using single linkage: hclust.single
+hclust.single <- hclust(dist(x), method = "single")
+
+# Plot dendrogram of hclust.complete
+plot(hclust.complete, main = "Complete")
+
+# Plot dendrogram of hclust.average
+plot(hclust.average, main = "Average")
+
+# Plot dendrogram of hclust.single
+plot(hclust.single, main = "Single")
+
+#---------------------------------------------------------------------
+
+Practical matters: scaling
+
+Recall from the video that clustering real data may require scaling the features if they have different distributions. So far in this chapter, you have been working with synthetic data that did not need scaling.
+
+In this exercise, you will go back to working with "real" data, the pokemon dataset introduced in the first chapter. You will observe the distribution (mean and standard deviation) of each feature, scale the data accordingly, then produce a hierarchical clustering model using the complete linkage method.
+
+# View column means
+colMeans(pokemonE)
+
+# View column standard deviations
+apply(pokemonE, 2, sd)
+
+# Scale the data
+pokemon.scaled <- scale(pokemonE) 
+
+# Create hierarchical clustering model: hclust.pokemon
+hclust.pokemon <- hclust(dist(pokemon.scaled), method = "complete")
+
+#---------------------------------------------------------------------
+
+Comparing kmeans() and hclust()
+
+Comparing k-means and hierarchical clustering, you'll see the two methods produce different cluster memberships. This is because the two algorithms make different assumptions about how the data is generated. In a more advanced course, we could choose to use one model over another based on the quality of the models' assumptions, but for now, it's enough to observe that they are different.
+
+This exercise will have you compare results from the two models on the pokemon dataset to see how they differ.
+
+# Apply cutree() to hclust.pokemon: cut.pokemon
+cut.pokemon <- cutree(hclust.pokemon, k = 3)
+
+# Compare methods
+table(cut.pokemon, km.pokemon$cluster)
+
+######################################################################
+######################################################################
+######################################################################
+
+######## Dimensionality reduction with PCA  (Module 03-021)
+######################################################################
+
+Introduction to PCA
+
+Unsupervised learning
+- Two methods of clustering - ???nding groups of homogeneous items
+- Next up, dimensionality reduction
+	- Find structure in features
+	- Aid in visualization
+
+Dimensionality reduction
+- A popular method is principal component analysis (PCA)
+- Three goals when ???nding lower dimensional representation of features:
+	- Find linear combination of variables to create principal components
+	- Maintain most variance in the data
+	- Principal components are uncorrelated (i.e. orthogonal to each other)
+
+#PCA intuition
+The idea is to reduce dimensions, to find a smaller dimension that represents most of the variance of the data
+
+2 dimensions: x and y in a PCA can be represent by just one principal component with a Regression line represents the principal component. Projected values on principal component is called component scores or factor scores.
+
+#PCA in R
+pr.iris <- prcomp(x = iris[-5], scale = FALSE, center = TRUE)
+summary(pr.iris)
+
+Importance of components:
+                           PC1     PC2    PC3     PC4
+   Standard deviation     2.0563 0.49262 0.2797 0.15439 
+   Proportion of Variance 0.9246 0.05307 0.0171 0.00521 
+   Cumulative Proportion  0.9246 0.97769 0.9948 1.00000
+
+#---------------------------------------------------------------------
+
+PCA using prcomp()
+
+In this exercise, you will create your first PCA model and observe the diagnostic results.
+
+We have loaded the Pokemon data from earlier, which has four dimensions, and placed it in a variable called pokemon. Your task is to create a PCA model of the data, then to inspect the resulting model using the summary() function.
+
+# Perform scaled PCA: pr.out
+pr.out <- prcomp(x = pokemon, scale = TRUE, center = TRUE)
+
+# Inspect model output
+summary(pr.out)
+
+#---------------------------------------------------------------------
+
+Additional results of PCA
+
+PCA models in R produce additional diagnostic and output components:
+
+    center: the column means used to center to the data, or FALSE if the data weren't centered
+    scale: the column standard deviations used to scale the data, or FALSE if the data weren't scaled
+    rotation: the directions of the principal component vectors in terms of the original features/variables. This information allows you to define new data in terms of the original principal components
+    x: the value of each observation in the original dataset projected to the principal components
+
+You can access these the same as other model components. For example, use pr.out$rotation to access the rotation component.
+
+Which of the following statements is not correct regarding the pr.out model fit on the pokemon data?
+
+#---------------------------------------------------------------------
+
+## Visualizing and interpreting PCA results
+
+1. Biplot
+2. Scree plot
+
+# Biplots and scree plots in R
+ 
+# Creating a biplot 
+pr.iris <- prcomp(x = iris[-5], scale = FALSE, center = TRUE) 
+biplot(pr.iris) 
+
+# Getting proportion of variance for a scree plot 
+pr.var <- pr.iris$sdev^2 
+pve <- pr.var / sum(pr.var) 
+
+# Plot variance explained for each principal component 
+plot(pve, xlab = "Principal Component",
+        ylab = "Proportion of Variance Explained",
+        ylim = c(0, 1), type = "b")
+
+#---------------------------------------------------------------------
+
+Interpreting biplots (1)
+
+As stated in the video, the biplot() function plots both the principal components loadings and the mapping of the observations to their first two principal component values. The next couple of exercises will check your interpretation of the biplot() visualization.
+
+Using the biplot() of the pr.out model, which two original variables have approximately the same loadings in the first two principal components?
+
+ biplot(pr.out)
+
+#---------------------------------------------------------------------
+
+Interpreting biplots (2)
+
+In the last exercise, you saw that Attack and HitPoints have approximately the same loadings in the first two principal components.
+
+Again using the biplot() of the pr.out model, which two Pokemon are the least similar in terms of the second principal component?
+
+ biplot(pr.out)
+
+#---------------------------------------------------------------------
+
+Variance explained
+
+The second common plot type for understanding PCA models is a scree plot. A scree plot shows the variance explained as the number of principal components increases. Sometimes the cumulative variance explained is plotted as well.
+
+In this and the next exercise, you will prepare data from the pr.out model you created at the beginning of the chapter for use in a scree plot. Preparing the data for plotting is required because there is not a built-in function in R to create this type of plot.
+
+# Variability of each principal component: pr.var
+pr.var <-  pr.out$sdev^2 
+
+# Variance explained by each principal component: pve
+pve <- pr.var / sum(pr.var)
+
+#---------------------------------------------------------------------
+
+Visualize variance explained
+
+Now you will create a scree plot showing the proportion of variance explained by each principal component, as well as the cumulative proportion of variance explained.
+
+Recall from the video that these plots can help to determine the number of principal components to retain. One way to determine the number of principal components to retain is by looking for an elbow in the scree plot showing that as the number of principal components increases, the rate at which variance is explained decreases substantially. In the absence of a clear elbow, you can use the scree plot as a guide for setting a threshold.
+
+# Plot variance explained for each principal component
+plot(pve, xlab = "Principal Component",
+     ylab = "Proportion of Variance Explained",
+     ylim = c(0, 1), type = "b")
+
+# Plot cumulative proportion of variance explained
+plot(cumsum(pve), xlab = "Principal Component",
+     ylab = "Cumulative Proportion of Variance Explained",
+     ylim = c(0, 1), type = "b")
+
+#---------------------------------------------------------------------
+
+##Practical issues with PC
+
+Practical issues with PCA
+1- Scaling the data
+2-  Missing values:
+	-  Drop observations with missing values
+	-  Impute / estimate missing values
+3-  Categorical data:
+	-  Do not use categorical data features
+	-  Encode categorical features as numbers
+
+#Scaling
+	data(mtcars) 
+	head(mtcars)
+# Means and standard deviations vary a lot
+	round(colMeans(mtcars), 2)
+	round(apply(mtcars, 2, sd), 2)
+#Scaling and PCA in R
+ 	prcomp(x, center = TRUE, scale = FALSE)
+
+#---------------------------------------------------------------------
+
+Practical issues: scaling
+
+You saw in the video that scaling your data before doing PCA changes the results of the PCA modeling. Here, you will perform PCA with and without scaling, then visualize the results using biplots.
+
+Sometimes scaling is appropriate when the variances of the variables are substantially different. This is commonly the case when variables have different units of measurement, for example, degrees Fahrenheit (temperature) and miles (distance). Making the decision to use scaling is an important step in performing a principal component analysis.
+
+# Mean of each variable
+colMeans(pokemon)
+
+# Standard deviation of each variable
+apply(pokemon, 2, sd)
+
+# PCA model with scaling: pr.with.scaling
+pr.with.scaling <- prcomp(pokemon, center = TRUE, scale = TRUE)
+
+# PCA model without scaling: pr.without.scaling
+pr.without.scaling <- prcomp(pokemon, center = TRUE, scale = FALSE)
+
+
+# Create biplots of both for comparison
+biplot(pr.with.scaling)
+biplot(pr.without.scaling)
+
+######################################################################
+######################################################################
+######################################################################
+
+######## Case Study: Putting it all together with a case study (Module 04-021)
+######################################################################
+
+Preparing the data
+
+Unlike prior chapters, where we prepared the data for you for unsupervised learning, the goal of this chapter is to step you through a more realistic and complete workflow.
+
+Recall from the video that the first step is to download and prepare the data.
+
+url <- "http://s3.amazonaws.com/assets.datacamp.com/production/course_1903/datasets/WisconsinCancer.csv"
+
+# Download the data: wisc.df
+wisc.df <- read.csv("http://s3.amazonaws.com/assets.datacamp.com/production/course_1903/datasets/WisconsinCancer.csv")
+
+# Convert the features of the data: wisc.data
+wisc.data <- as.matrix(wisc.df[,3:32])
+
+# Set the row names of wisc.data
+row.names(wisc.data) <- wisc.df$id
+
+# Create diagnosis vector
+diagnosis <- as.numeric(wisc.df$diagnosis == "M")
+
+#---------------------------------------------------------------------
+
+Exploratory data analysis
+
+The first step of any data analysis, unsupervised or supervised, is to familiarize yourself with the data.
+
+The variables you created before, wisc.data and diagnosis, are still available in your workspace. Explore the data to answer the following questions:
+
+    How many observations are in this dataset?
+    How many variables/features in the data are suffixed with _mean?
+    How many of the observations have a malignant diagnosis?
+
+dim(wisc.data)
+summary(wisc.data)
+sum(diagnosis)
+
+#---------------------------------------------------------------------
+
+Performing PCA
+
+The next step in your analysis is to perform PCA on wisc.data.
+
+You saw in the last chapter that it's important to check if the data need to be scaled before performing PCA. Recall two common reasons for scaling data:
+
+    The input variables use different units of measurement.
+    The input variables have significantly different variances.
+
+# Check column means and standard deviations
+colMeans(wisc.data)
+apply(wisc.data, 2, sd)
+
+
+# Execute PCA, scaling if appropriate: wisc.pr
+wisc.pr <- prcomp(wisc.data, center = TRUE, scale = TRUE)
+
+# Look at summary of results
+summary(wisc.pr)
+
+#---------------------------------------------------------------------
+
+Interpreting PCA results
+
+Now you'll use some visualizations to better understand your PCA model. You were introduced to one of these visualizations, the biplot, in an earlier chapter.
+
+You'll run into some common challenges with using biplots on real-world data containing a non-trivial number of observations and variables, then you'll look at some alternative visualizations. You are encouraged to experiment with additional visualizations before moving on to the next exercise.
+
+# Create a biplot of wisc.pr
+biplot(wisc.pr) 
+
+# Scatter plot observations by components 1 and 2
+plot(wisc.pr$x[, c(1, 2)], col = (diagnosis + 1), 
+     xlab = "PC1", ylab = "PC2")
+
+# Repeat for components 1 and 3
+plot(wisc.pr$x[, c(1, 3)], col = (diagnosis + 1), 
+     xlab = "PC1", ylab = "PC3")
+
+# Do additional data exploration of your choosing below (optional)
+plot(wisc.pr$x[, c(2, 3)], col = (diagnosis + 1), 
+     xlab = "PC2", ylab = "PC3")
+
+#---------------------------------------------------------------------
+
+Variance explained
+
+In this exercise, you will produce scree plots showing the proportion of variance explained as the number of principal components increases. The data from PCA must be prepared for these plots, as there is not a built-in function in R to create them directly from the PCA model.
+
+As you look at these plots, ask yourself if there's an elbow in the amount of variance explained that might lead you to pick a natural number of principal components. If an obvious elbow does not exist, as is typical in real-world datasets, consider how else you might determine the number of principal components to retain based on the scree plot.
+
+# Set up 1 x 2 plotting grid
+par(mfrow = c(1, 2))
+
+# Calculate variability of each component
+pr.var <- wisc.pr$sdev^2 
+
+# Variance explained by each principal component: pve
+pve <- pr.var / sum(pr.var) 
+
+# Plot variance explained for each principal component
+plot(pve, xlab = "Principal Component", 
+     ylab = "Proportion of Variance Explained", 
+     ylim = c(0, 1), type = "b")
+
+# Plot cumulative proportion of variance explained
+plot(cumsum(pve), xlab = "Principal Component", 
+     ylab = "Cumulative Proportion of Variance Explained", 
+     ylim = c(0, 1), type = "b")
+
+#---------------------------------------------------------------------
+
+Communicating PCA results
+
+This exercise will check your understanding of the PCA results, in particular the loadings and variance explained. The loadings, represented as vectors, explain the mapping from the original features to the principal components. The principal components are naturally ordered from the most variance explained to the least variance explained.
+
+The variables you created before-wisc.data, diagnosis, wisc.pr, and pve-are still available.
+
+For the first principal component, what is the component of the loading vector for the feature concave.points_mean? What is the minimum number of principal components required to explain 80% of the variance of the data?
+
+wisc.pr
+summary(wisc.pr)
+
+#---------------------------------------------------------------------
+
+Hierarchical clustering of case data
+
+The goal of this exercise is to do hierarchical clustering of the observations. Recall from Chapter 2 that this type of clustering does not assume in advance the number of natural groups that exist in the data.
+
+As part of the preparation for hierarchical clustering, distance between all pairs of observations are computed. Furthermore, there are different ways to link clusters together, with single, complete, and average being the most common linkage methods.
+
+# Scale the wisc.data data: data.scaled
+data.scaled <-  scale(wisc.data) 
+
+# Calculate the (Euclidean) distances: data.dist
+data.dist <- dist(data.scaled) 
+
+# Create a hierarchical clustering model: wisc.hclust
+wisc.hclust <- hclust(data.dist, method = "complete")
+
+#---------------------------------------------------------------------
+
+Results of hierarchical clustering
+
+Let's use the hierarchical clustering model you just created to determine a height (or distance between clusters) where a certain number of clusters exists. The variables you created before-wisc.data, diagnosis, wisc.pr, pve, and wisc.hclust-are all available in your workspace.
+
+Using the plot() function, what is the height at which the clustering model has 4 clusters?
+
+plot(wisc.hclust)
+
+#---------------------------------------------------------------------
+
+Selecting number of clusters
+
+In this exercise, you will compare the outputs from your hierarchical clustering model to the actual diagnoses. Normally when performing unsupervised learning like this, a target variable isn't available. We do have it with this dataset, however, so it can be used to check the performance of the clustering model.
+
+When performing supervised learning-that is, when you're trying to predict some target variable of interest and that target variable is available in the original data-using clustering to create new features may or may not improve the performance of the final model. This exercise will help you determine if, in this case, hierarchical clustering provides a promising new feature.
+
+# Cut tree so that it has 4 clusters: wisc.hclust.clusters
+wisc.hclust.clusters <- cutree(wisc.hclust, k = 4)
+
+# Compare cluster membership to actual diagnoses
+table(wisc.hclust.clusters, diagnosis)
+
+#---------------------------------------------------------------------
+
+k-means clustering and comparing results
+
+As you now know, there are two main types of clustering: hierarchical and k-means.
+
+In this exercise, you will create a k-means clustering model on the Wisconsin breast cancer data and compare the results to the actual diagnoses and the results of your hierarchical clustering model. Take some time to see how each clustering model performs in terms of separating the two diagnoses and how the clustering models compare to each other.
+
+# Create a k-means model on wisc.data: wisc.km
+wisc.km <- kmeans(scale(wisc.data), centers = 2, nstart = 20)
+
+# Compare k-means to actual diagnoses
+table(wisc.km$cluster, diagnosis)
+
+# Compare k-means to hierarchical clustering
+table(wisc.km$cluster, wisc.hclust.clusters)
+
+#---------------------------------------------------------------------
+
+Clustering on PCA results
+
+In this final exercise, you will put together several steps you used earlier and, in doing so, you will experience some of the creativity that is typical in unsupervised learning.
+
+Recall from earlier exercises that the PCA model required significantly fewer features to describe 80% and 95% of the variability of the data. In addition to normalizing data and potentially avoiding overfitting, PCA also uncorrelates the variables, sometimes improving the performance of other modeling techniques.
+
+Let's see if PCA improves or degrades the performance of hierarchical clustering.
+
+# Create a hierarchical clustering model: wisc.pr.hclust
+wisc.pr.hclust <- hclust(dist(wisc.pr$x[, 1:7]), method = "complete")
+
+# Cut model into 4 clusters: wisc.pr.hclust.clusters
+wisc.pr.hclust.clusters <- cutree(wisc.pr.hclust, k = 4)
+
+# Compare to actual diagnoses
+table(wisc.hclust.clusters, diagnosis)
+table(wisc.pr.hclust.clusters, diagnosis)
+
+# Compare to k-means and hierarchical
+table(wisc.km$cluster, diagnosis)
+table(wisc.km$cluster, wisc.pr.hclust.clusters)
+
+END

@@ -1,0 +1,1532 @@
+######################################################################
+######################################################################
+######################################################################
+
+# COURSE 012_Data Visualization with ggplot2 (Part 1)
+
+######################################################################
+######################################################################
+######################################################################
+
+########  Introduction  (Module 01-012)
+######################################################################
+
+Exploring ggplot2, part 1
+
+To get a first feel for ggplot2, let's try to run some basic ggplot2 commands. Together, they build a plot of the mtcars dataset that contains information about 32 cars from a 1973 Motor Trend magazine. This dataset is small, intuitive, and contains a variety of continuous and categorical variables.
+
+# Load the ggplot2 package
+library(ggplot2)
+
+# Explore the mtcars data frame with str()
+str(mtcars)
+
+# Execute the following command
+ggplot(mtcars, aes(x = cyl, y = mpg)) +
+  geom_point()
+
+#---------------------------------------------------------------------
+
+Exploring ggplot2, part 2
+
+The plot from the previous exercise wasn't really satisfying. Although cyl (the number of cylinders) is categorical, it is classified as numeric in mtcars. You'll have to explicitly tell ggplot2 that cyl is a categorical variable.
+
+# Load the ggplot2 package
+library(ggplot2)
+
+# Change the command below so that cyl is treated as factor
+ggplot(mtcars, aes(x = factor(cyl), y = mpg)) +
+  geom_point()
+  
+#Stellar scatterplotting! Notice that ggplot2 treats cyl as a factor. This time the x-axis does not contain variables like 5 or 7, only the values that are present in the dataset. 
+  
+#---------------------------------------------------------------------
+
+VIDEO
+
+Grammar of Graphics
+
+Essential Gramatical Elements
+
+1- Data: the dataset being plotted
+2- Aesthetics: The scales onto which we map our data
+3- Geometries: The visual elements used for our data
+
+Optional Gramatical Elements
+
+4- Facets: plotting small multiples
+5- Statistics: Representations of our data to aid understanding
+6- Coordinates: the space on which the data will be plotted
+7- Themes: All non-data ink.
+
+
+Data: (variables of interest)
+
+Aesthetics: x-axis, y-axis, colour, fill, size, labels, alpha, shape, line width, line type
+
+Facets: columns, rows
+
+Statistics: binning, smoothing, descriptive, inferential
+
+Coordinates: cartesian, fixed, polar, limits
+
+Themes: non-data ink
+
+#---------------------------------------------------------------------
+
+Exploring ggplot2, part 3
+
+We'll use several datasets throughout the courses to showcase the concepts discussed in the videos. In the previous exercises, you already got to know mtcars. Let's dive a little deeper to explore the three main topics in this course: The data, aesthetics, and geom layers.
+
+The mtcars dataset contains information about 32 cars from 1973 Motor Trend magazine. This dataset is small, intuitive, and contains a variety of continuous and categorical variables.
+
+You're encouraged to think about how the examples and concepts we discuss throughout these data viz courses apply to your own data-sets!
+
+# A scatter plot has been made for you
+ggplot(mtcars, aes(x = wt, y = mpg)) +
+  geom_point()
+
+# Replace ___ with the correct column
+ggplot(mtcars, aes(x = wt, y = mpg, color = disp)) +
+  geom_point()
+
+# Replace ___ with the correct column
+ggplot(mtcars, aes(x = wt, y = mpg, size = disp)) +
+  geom_point()
+
+#---------------------------------------------------------------------
+
+VIDEO
+
+ggplot2
+
+Iris dataset (flowers)
+Sepal.lengh x
+Sepal.Width Y
+
+levels(iris$Species) <- c("Setosa", "Versicolor", "Virginica")
+ggplot(iris, aes(x = Sepal.Length, y = Sepal.Width)) +
+	geom_jitter(alpha = 0.6) + 
+	facet_grid(. ~ Species) +
+	stat_smooth(method = "lm", se = F, col = "red") +
+	scale_y_continuous("Sepal Width (cm)",
+		limits = c(2,5),
+		expand = c(0,0)) +
+	scale_x_continuous("Sepal Length (cm)",
+		limits = c(4,8),
+		expand = c(0,0)) +
+	coord_equal() + 
+	
+	theme(	panel.background = element_blank(),
+		plot.background = element_blank(),
+		legend.background = element_blank(),
+		legend.key = element_blank(),
+		strip.background = element_blank(),
+		axis.text = element_text(colour = "black"),
+		axis.ticks = element_line(colour = "black"),
+		panel.grid.major = element_blank(),
+		panel.grid.minor = element_blank(),
+		axis.line = element_line(colour = "black"),
+		strip.text = element_blank(),
+		panel.spacing = unit(1, "lines")
+		)
+
+#---------------------------------------------------------------------
+
+Exploring ggplot2, part 4
+
+The diamonds data frame contains information on the prices and various metrics of 50,000 diamonds. Among the variables included are carat (a measurement of the size of the diamond) and price. For the next exercises, you'll be using a subset of 1,000 diamonds.
+
+Here you'll use two common geom layer functions: geom_point() and geom_smooth(). We already saw in the earlier exercises how these are added using the + operator.
+
+# Explore the diamonds data frame with str()
+str(diamonds)
+
+# Add geom_point() with +
+ggplot(diamonds, aes(x = carat, y = price)) +
+  geom_point()
+
+
+
+# Add geom_point() and geom_smooth() with +
+ggplot(diamonds, aes(x = carat, y = price)) +
+  geom_point() +
+  geom_smooth()
+
+#---------------------------------------------------------------------
+
+Exploring ggplot2, part 5
+
+The code for the last plot of the previous exercise is available in the script on the right. It builds a scatter plot of the diamonds dataset, with carat on the x-axis and price on the y-axis. geom_smooth() is used to add a smooth line.
+
+With this plot as a starting point, let's explore some more possibilities of combining geoms.
+
+# 1 - The plot you created in the previous exercise
+ggplot(diamonds, aes(x = carat, y = price)) +
+  geom_point() +
+  geom_smooth()
+
+# 2 - Copy the above command but show only the smooth line
+ggplot(diamonds, aes(x = carat, y = price)) +
+  geom_smooth()
+
+# 3 - Copy the above command and assign the correct value to col in aes()
+ggplot(diamonds, aes(x = carat, y = price, color = clarity)) +
+  geom_smooth()
+
+# 4 - Keep the color settings from previous command. Plot only the points with argument alpha.
+ggplot(diamonds, aes(x = carat, y = price, color = clarity)) +
+  geom_point(alpha = 0.4)
+
+#---------------------------------------------------------------------
+
+Understanding the grammar, part 1
+
+Here you'll explore some of the different grammatical elements. Throughout this course, you'll discover how they can be combined in all sorts of ways to develop unique plots.
+
+In the following instructions, you'll start by creating a ggplot object from the diamonds dataset. Next, you'll add layers onto this object to build beautiful & informative plots.
+
+# Create the object containing the data and aes layers: dia_plot
+dia_plot <- ggplot(diamonds, aes(x = carat, y = price))
+
+# Add a geom layer with + and geom_point()
+dia_plot + geom_point()
+
+# Add the same geom layer, but with aes() inside
+dia_plot + geom_point(aes(color = clarity))
+
+#---------------------------------------------------------------------
+
+Understanding the grammar, part 2
+
+Continuing with the previous exercise, here you'll explore mixing arguments and aesthetics in a single geometry.
+
+You're still working on the diamonds dataset.
+
+# 1 - The dia_plot object has been created for you
+dia_plot <- ggplot(diamonds, aes(x = carat, y = price))
+
+# 2 - Expand dia_plot by adding geom_point() with alpha set to 0.2
+dia_plot <- dia_plot + geom_point(alpha = 0.2)
+
+# 3 - Plot dia_plot with additional geom_smooth() with se set to FALSE
+dia_plot + geom_smooth(se = FALSE)
+
+# 4 - Copy the command from above and add aes() with the correct mapping to geom_smooth()
+dia_plot + geom_smooth(aes(col = clarity), se = FALSE)
+
+######################################################################
+######################################################################
+
+########  Data  (Module 02-012)
+######################################################################
+
+VIDEO
+
+Objects and Layers
+
+#---------------------------------------------------------------------
+
+base package and ggplot2, part 1 - plot
+
+These courses are about understanding data visualization in the context of the grammar of graphics. To gain a better appreciation of ggplot2 and to understand how it operates differently from base package, it's useful to make some comparisons.
+
+In the video, you already saw one example of how to make a (poor) multivariate plot in base package. In this series of exercises you'll take a look at a better way using the equivalent version in ggplot2.
+
+First, let's focus on base package. You want to make a plot of mpg (miles per gallon) against wt (weight in thousands of pounds) in the mtcars data frame, but this time you want the dots colored according to the number of cylinders, cyl. How would you do that in base package? You can use a little trick to color the dots by specifying a factor variable as a color. This works because factors are just a special class of the integer type.
+
+# Plot the correct variables of mtcars
+plot(mtcars$wt, mtcars$mpg, col = mtcars$cyl)
+
+# Change cyl inside mtcars to a factor
+mtcars$fcyl <- as.factor(mtcars$cyl)
+
+# Make the same plot as in the first instruction
+plot(mtcars$wt, mtcars$mpg, col = mtcars$fcyl)
+
+#---------------------------------------------------------------------
+
+base package and ggplot2, part 2 - lm
+
+If you want to add a linear model to your plot, shown right, you can define it with lm() and then plot the resulting linear model with abline(). However, if you want a model for each subgroup, according to cylinders, then you have a couple of options.
+
+You can subset your data, and then calculate the lm() and plot each subset separately. Alternatively, you can vectorize over the cyl variable using lapply() and combine this all in one step. This option is already prepared for you.
+
+The code to the right contains a call to the function lapply(), which you might not have seen before. This function takes as input a vector and a function. Then lapply() applies the function it was given to each element of the vector and returns the results in a list. In this case, lapply() takes each element of mtcars$cyl and calls the function defined in the second argument. This function takes a value of mtcars$cyl and then subsets the data so that only rows with cyl == x are used. Then it fits a linear model to the filtered dataset and uses that model to add a line to the plot with the abline() function.
+
+Now that you have an interesting plot, there is a very important aspect missing
+
+# Use lm() to calculate a linear model and save it as carModel
+carModel <- lm(mpg ~ wt, data = mtcars)
+
+# Basic plot
+mtcars$cyl <- as.factor(mtcars$cyl)
+plot(mtcars$wt, mtcars$mpg, col = mtcars$cyl)
+
+# Call abline() with carModel as first argument and set lty to 2
+abline(carModel, lty = 2)
+
+# Plot each subset efficiently with lapply
+# You don't have to edit this code
+plot(mtcars$wt, mtcars$mpg, col = mtcars$cyl)
+lapply(mtcars$cyl, function(x) {
+  abline(lm(mpg ~ wt, mtcars, subset = (cyl == x)), col = x)
+  })
+
+# This code will draw the legend of the plot
+# You don't have to edit this code
+legend(x = 5, y = 33, legend = levels(mtcars$cyl),
+       col = 1:3, pch = 1, bty = "n")
+
+#---------------------------------------------------------------------
+
+base package and ggplot2, part 3
+
+In this exercise you'll recreate the base package plot in ggplot2.
+
+The code for base R plotting is given at the top. The first line of code already converts the cyl variable of mtcars to a factor.
+
+# Convert cyl to factor (don't need to change)
+mtcars$cyl <- as.factor(mtcars$cyl)
+
+# Example from base R (don't need to change)
+plot(mtcars$wt, mtcars$mpg, col = mtcars$cyl)
+abline(lm(mpg ~ wt, data = mtcars), lty = 2)
+lapply(mtcars$cyl, function(x) {
+  abline(lm(mpg ~ wt, mtcars, subset = (cyl == x)), col = x)
+  })
+legend(x = 5, y = 33, legend = levels(mtcars$cyl),
+       col = 1:3, pch = 1, bty = "n")
+
+# Plot 1: add geom_point() to this command to create a scatter plot
+ggplot(mtcars, aes(x = wt, y = mpg, col = cyl)) + 
+  geom_point()  # Fill in using instructions Plot 1
+
+# Plot 2: include the lines of the linear models, per cyl
+ggplot(mtcars, aes(x = wt, y = mpg, col = cyl)) +
+  geom_point() + # Copy from Plot 1
+  geom_smooth(method = "lm", se = FALSE)  # Fill in using instructions Plot 2
+
+# Plot 3: include a lm for the entire dataset in its whole
+ggplot(mtcars, aes(x = wt, y = mpg, col = cyl)) +
+  geom_point() + # Copy from Plot 2
+  geom_smooth(method = "lm", se = FALSE) +  # Fill in using instructions Plot 2 + # Copy from Plot 2
+  geom_smooth(aes(), method = "lm", se = FALSE, linetype = 2)   # Fill in using instructions Plot 3
+
+#---------------------------------------------------------------------
+
+VIDEO
+
+Proper Data Format
+
+Tidy Data
+
+#---------------------------------------------------------------------
+
+Variables to visuals, part 1
+
+So far you've seen four different forms of the iris dataset: iris, iris.wide, iris.wide2 and iris.tidy. Don't let all these different forms confuse you! It's exactly the same data, just rearranged so that your plotting functions become easier.
+
+To see this in action, consider the plot in the graphics device at right. Which form of the dataset would be the most appropriate to use here?
+
+# Consider the structure of iris, iris.wide and iris.tidy (in that order)
+str(iris)
+str(iris.wide)
+str(iris.tidy)
+
+# Think about which dataset you would use to get the plot shown right
+# Fill in the ___ to produce the plot given to the right
+ggplot(iris.tidy, aes(x = Species, y = Value, col = Part)) +
+  geom_jitter() +
+  facet_grid(. ~ Measure)
+
+#---------------------------------------------------------------------
+
+Variables to visuals, part 1b
+
+In the last exercise you saw how iris.tidy was used to make a specific plot. It's important to know how to rearrange your data in this way so that your plotting functions become easier. In this exercise you'll use functions from the tidyr package to convert iris to iris.tidy.
+
+The resulting iris.tidy data should look as follows:
+
+      Species  Part Measure Value
+    1  setosa Sepal  Length   5.1
+    2  setosa Sepal  Length   4.9
+    3  setosa Sepal  Length   4.7
+    4  setosa Sepal  Length   4.6
+    5  setosa Sepal  Length   5.0
+    6  setosa Sepal  Length   5.4
+    ...
+
+You can have a look at the iris dataset by typing head(iris) in the console.
+
+Note: If you're not familiar with %>%, gather() and separate(), you may want to take the Cleaning Data in R course. In a nutshell, a dataset is called tidy when every row is an observation and every column is a variable. The gather() function moves information from the columns to the rows. It takes multiple columns and gathers them into a single column by adding rows. The separate() function splits one column into two or more columns according to a pattern you define. Lastly, the %>% (or "pipe") operator passes the result of the left-hand side as the first argument of the function on the right-hand side.
+
+# Load the tidyr package
+library(tidyr)
+
+# Fill in the ___ to produce to the correct iris.tidy dataset
+iris.tidy <- iris %>%
+  gather(key, Value, -Species) %>%
+  separate(key, c("Part", "Measure"), "\\.")
+
+#---------------------------------------------------------------------
+
+Variables to visuals, part 2
+
+Here you'll take a look at another plot variant, shown on the right. Which of your data frames would be used to produce this plot?
+
+# The 3 data frames (iris, iris.wide and iris.tidy) are available in your environment
+# Execute head() on iris, iris.wide and iris.tidy (in that order)
+head(iris)
+head(iris.wide)
+head(iris.tidy)
+
+# Think about which dataset you would use to get the plot shown right
+# Fill in the ___ to produce the plot given to the right
+ggplot(iris.wide, aes(x = Length, y = Width, color = Part)) +
+  geom_jitter() +
+  facet_grid(. ~ Species)
+
+#---------------------------------------------------------------------
+
+Variables to visuals, part 2b
+
+In the last exercise you saw how iris.wide was used to make a specific plot. You also saw previously how you can derive iris.tidy from iris. Now you'll move on to produce iris.wide.
+
+The head of the iris.wide should look like this in the end:
+
+  Species  Part Length Width
+1  setosa Petal    1.4   0.2
+2  setosa Petal    1.4   0.2
+3  setosa Petal    1.3   0.2
+4  setosa Petal    1.5   0.2
+5  setosa Petal    1.4   0.2
+6  setosa Petal    1.7   0.4
+...
+
+You can have a look at the iris dataset by typing head(iris) in the console.
+
+# Load the tidyr package
+library(tidyr)
+
+# Add column with unique ids (don't need to change)
+iris$Flower <- 1:nrow(iris)
+
+# Fill in the ___ to produce to the correct iris.wide dataset
+iris.wide <- iris %>%
+  gather(key, value, -Species, -Flower) %>%
+  separate(key, c("Part", "Measure"), "\\.") %>%
+  spread(Measure, value)
+  
+######################################################################
+######################################################################
+
+########  Aesthetics   (Module 03-012)
+######################################################################
+
+VIDEO
+
+Visible Aesthetics
+
+	Aesthetic	Description
+1.	x		X axis position
+2.	y		Y axis position
+3.	colour		Colour of dots, outlines of other shapes
+4.	fill		Fill colour
+5.	size		diameter of points, 6.	thickness of lines
+6.	alpha		Transparency (0 transparent, 1 fill)
+7.	Linetype	Line dash pattern
+8.	labels		Text on plot or axes
+9.	Shape		Shape
+
+#---------------------------------------------------------------------
+
+All about aesthetics, part 1
+
+In the video you saw 9 visible aesthetics. Let's apply them to a categorical variable - the cylinders in mtcars, cyl.
+
+(You'll consider line type when you encounter line plots in the next chapter).
+
+These are the aesthetics you can consider within aes() in this chapter: x, y, color, fill, size, alpha, labels and shape.
+
+In the following exercise you can assume that the cyl column is categorical. It has already been transformed into a factor for you.
+
+# 1 - Map mpg to x and cyl to y
+ggplot(mtcars, aes(mpg, cyl)) +
+  geom_point()
+  
+# 2 - Reverse: Map cyl to x and mpg to y
+ggplot(mtcars, aes(cyl, mpg)) +
+  geom_point()
+
+# 3 - Map wt to x, mpg to y and cyl to col
+ggplot(mtcars, aes(wt, mpg, col = cyl)) +
+  geom_point()
+
+# 4 - Change shape and size of the points in the above plot
+ggplot(mtcars, aes(wt, mpg, col = cyl)) +
+  geom_point(shape = 1, size = 4)
+
+
+#---------------------------------------------------------------------
+
+All about aesthetics, part 2
+
+The color aesthetic typically changes the outside outline of an object and the fill aesthetic is typically the inside shading. However, as you saw in the last exercise, geom_point() is an exception. Here you use color, instead of fill for the inside of the point. But it's a bit subtler than that.
+
+Which shape to use? The default geom_point() uses shape = 19 (a solid circle with an outline the same colour as the inside). Good alternatives are shape = 1 (hollow) and shape = 16 (solid, no outline). These all use the col aesthetic (don't forget to set alpha for solid points).
+
+A really nice alternative is shape = 21 which allows you to use both fill for the inside and col for the outline! This is a great little trick for when you want to map two aesthetics to a dot.
+
+What happens when you use the wrong aesthetic mapping? This is a very common mistake! The code from the previous exercise is in the editor. Using this as your starting point complete the instructions.
+
+# am and cyl are factors, wt is numeric
+class(mtcars$am)
+class(mtcars$cyl)
+class(mtcars$wt)
+
+# From the previous exercise
+ggplot(mtcars, aes(x = wt, y = mpg, col = cyl)) +
+  geom_point(shape = 1, size = 4)
+
+# 1 - Map cyl to fill
+ggplot(mtcars, aes(x = wt, y = mpg, fill = cyl)) +
+  geom_point(shape = 1, size = 4)
+
+
+# 2 - Change shape and alpha of the points in the above plot
+ggplot(mtcars, aes(x = wt, y = mpg, fill = cyl)) +
+  geom_point(shape = 21, size = 4, alpha = 0.6)
+
+
+# 3 - Map am to col in the above plot
+ggplot(mtcars, aes(x = wt, y = mpg, fill = cyl, col = am)) +
+  geom_point(shape = 21, size = 4, alpha = 0.6)
+
+#---------------------------------------------------------------------
+
+All about aesthetics, part 3
+
+Now that you've got some practice with incrementally building up plots, you can try to do it from scratch! The mtcars dataset is pre-loaded in the workspace.
+
+# Map cyl to size
+ggplot(mtcars, aes(x = wt, y = mpg, size = cyl)) +
+  geom_point()
+
+# Map cyl to alpha
+ggplot(mtcars, aes(x = wt, y = mpg, alpha = cyl)) +
+  geom_point()
+
+
+# Map cyl to shape 
+ggplot(mtcars, aes(x = wt, y = mpg, shape = cyl)) +
+  geom_point()
+
+
+# Map cyl to label
+ggplot(mtcars, aes(x = wt, y = mpg, label = cyl)) +
+  geom_point() + geom_text()
+
+#---------------------------------------------------------------------
+
+All about attributes, part 1
+
+In the video you saw that you can use all the aesthetics as attributes. Let's see how this works with the aesthetics you used in the previous exercises: x, y, color, fill, size, alpha, label and shape.
+
+This time you'll use these arguments to set attributes of the plot, not aesthetics. However, there are some pitfalls you'll have to watch out for: these attributes can overwrite the aesthetics of your plot!
+
+A word about shapes: In the exercise "All about aesthetics, part 2", you saw that shape = 21 results in a point that has a fill and an outline. Shapes in R can have a value from 1-25. Shapes 1-20 can only accept a color aesthetic, but shapes 21-25 have both a color and a fill aesthetic. See the pch argument in par() for further discussion.
+
+A word about hexadecimal colours: Hexadecimal, literally "related to 16", is a base-16 alphanumeric counting system. Individual values come from the ranges 0-9 and A-F. This means there are 256 possible two-digit values (i.e. 00 - FF). Hexadecimal colours use this system to specify a six-digit code for Red, Green and Blue values ("#RRGGBB") of a colour (i.e. Pure blue: "#0000FF", black: "#000000", white: "#FFFFFF"). R can accept hex codes as valid colours.
+
+# Define a hexadecimal color
+my_color <- "#4ABEFF"
+
+# Draw a scatter plot with color *aesthetic*
+ggplot(mtcars, aes(x = wt, y = mpg, col = cyl)) +
+  geom_point()
+
+
+# Same, but set color *attribute* in geom layer 
+ggplot(mtcars, aes(x = wt, y = mpg, col = cyl)) +
+  geom_point(col = my_color)
+
+
+
+# Set the fill aesthetic; color, size and shape attributes
+ggplot(mtcars, aes(x = wt, y = mpg, fill = cyl)) +
+  geom_point(col = my_color, size = 10, shape = 23)
+
+
+#---------------------------------------------------------------------
+
+All about attributes, part 2
+
+In the videos you saw that you can use all the aesthetics as attributes. Let's see how this works with the aesthetics you used in the previous exercises: x, y, color, fill, size, alpha, label and shape.
+
+In this exercise you will set all kinds of attributes of the points!
+
+You will continue to work with mtcars.
+
+# Expand to draw points with alpha 0.5
+ggplot(mtcars, aes(x = wt, y = mpg, fill = cyl)) +
+  geom_point(alpha = 0.5)
+
+  
+# Expand to draw points with shape 24 and color yellow
+ggplot(mtcars, aes(x = wt, y = mpg, fill = cyl))  +
+  geom_point(shape = 24, col = "yellow")
+
+  
+# Expand to draw text with label rownames(mtcars) and color red
+ggplot(mtcars, aes(x = wt, y = mpg, fill = cyl, label = rownames(mtcars)))
+
+#---------------------------------------------------------------------
+
+Going all out
+
+In this exercise, you will gradually add more aesthetics layers to the plot. You're still working with the mtcars dataset, but this time you're using more features of the cars. For completeness, here is a list of all the features of the observations in mtcars:
+
+    mpg -- Miles/(US) gallon
+    cyl -- Number of cylinders
+    disp -- Displacement (cu.in.)
+    hp -- Gross horsepower
+    drat -- Rear axle ratio
+    wt -- Weight (lb/1000)
+    qsec -- 1/4 mile time
+    vs -- V/S engine.
+    am -- Transmission (0 = automatic, 1 = manual)
+    gear -- Number of forward gears
+    carb -- Number of carburetors
+
+Notice that adding more aesthetics to your plot is not always a good idea. Adding aesthetic mappings to a plot will increase its complexity, and thus decrease its readability.
+
+# Map mpg onto x, qsec onto y and factor(cyl) onto col
+ggplot(mtcars, aes(x = mpg, y = qsec, col = factor(cyl)))  +
+  geom_point()
+
+
+# Add mapping: factor(am) onto shape
+ggplot(mtcars, aes(x = mpg, y = qsec, col = factor(cyl), shape = factor(am)))  +
+  geom_point()
+
+
+# Add mapping: (hp/wt) onto size
+ggplot(mtcars, aes(x = mpg, y = qsec, col = factor(cyl), shape = factor(am), size = (hp/wt)))  +
+  geom_point()
+
+#---------------------------------------------------------------------
+
+VIDEO
+
+Modifying Aesthetics
+
+Positions: identity, dodge, stack, fill, jitter, jitterdodge
+
+Scale Functions: scale_x..., scale_y..., scale_color..., scale_fill..., scale_shape..., scale_linetype...
+
+ex: 	scale_x_continuous
+	scale_color_discrete
+
+categorical: discrete, factor, cualitators... are the same
+
+inside scale x: limits, breaks, expand, labels
+
+Ex
+
+ggplot(iris, aes(x = Sepal.Length, y= Sepal.Width, col= Species)) +
+	geom_point(position = "jitter") +
+	scale_x_continuous("Sepal Length", limits = c(2,8), breaks = seq(2, 8, 3), expand = c(0, 0)) +
+	scale_color_discrete("Species", labels = c("Setosa", "Versicolour", "Virginica"))
+
+# if you want to quickly change the axis labels, you could use the labs function
+
+ggplot(iris, aes(x = Sepal.Length, y= Sepal.Width, col= Species)) +
+	geom_point(position = "jitter") + 
+	labs(x = "Sepal Length xxx", y = "Sepal Width xxx", col = "Species xxx")
+
+#---------------------------------------------------------------------
+
+Position
+
+You saw how jittering worked in the video, but bar plots suffer from their own issues of overplotting, as you'll see here. Use the "stack", "fill" and "dodge" positions to reproduce the plot in the viewer.
+
+The ggplot2 base layers (data and aesthetics) have already been coded; they're stored in a variable cyl.am. It looks like this:
+
+cyl.am <- ggplot(mtcars, aes(x = factor(cyl), fill = factor(am)))
+
+# The base layer, cyl.am, is available for you
+# Add geom (position = "stack" by default)
+cyl.am + 
+  geom_bar()
+
+# Fill - show proportion
+cyl.am + 
+  geom_bar(position = "fill")  
+
+# Dodging - principles of similarity and proximity
+cyl.am +
+  geom_bar(position = "dodge") 
+
+# Clean up the axes with scale_ functions
+val = c("#E41A1C", "#377EB8")
+lab = c("Manual", "Automatic")
+cyl.am +
+  geom_bar(position = "dodge") +
+  scale_x_discrete("Cylinders") + 
+  scale_y_continuous("Number") +
+  scale_fill_manual("Transmission", 
+                    values = val,
+                    labels = lab)
+                    
+#---------------------------------------------------------------------
+
+Setting a dummy aesthetic
+
+In the last chapter you saw that all the visible aesthetics can serve as attributes and aesthetics, but I very conveniently left out x and y. That's because although you can make univariate plots (such as histograms, which you'll get to in the next chapter), a y-axis will always be provided, even if you didn't ask for it.
+
+In the base package you can make univariate plots with stripchart() (shown in the viewer) directly and it will take care of a fake y axis for us. Since this is univariate data, there is no real y axis.
+
+You can get the same thing in ggplot2, but it's a bit more cumbersome. The only reason you'd really want to do this is if you were making many plots and you wanted them to be in the same style, or you wanted to take advantage of an aesthetic mapping (e.g. colour).
+
+# 1 - Create jittered plot of mtcars, mpg onto x, 0 onto y
+ggplot(mtcars, aes(x = mpg, y = 0)) +
+  geom_jitter()
+
+# 2 - Add function to change y axis limits
+ggplot(mtcars, aes(x = mpg, y = 0)) +
+  geom_jitter() +
+  scale_y_continuous(limits = c(-2,2))
+
+#---------------------------------------------------------------------
+
+Overplotting 1 - Point shape and transparency
+
+In the previous section you saw that there are lots of ways to use aesthetics. Perhaps too many, because although they are possible, they are not all recommended. Let's take a look at what works and what doesn't.
+
+So far you've focused on scatter plots since they are intuitive, easily understood and very common. A major consideration in any scatter plot is dealing with overplotting. You'll encounter this topic again in the geometries layer, but you can already make some adjustments here.
+
+You'll have to deal with overplotting when you have:
+
+    Large datasets,
+    Imprecise data and so points are not clearly separated on your plot (you saw this in the video with the iris dataset),
+    Interval data (i.e. data appears at fixed values), or
+    Aligned data values on a single axis.
+
+One very common technique that I'd recommend to always use when you have solid shapes it to use alpha blending (i.e. adding transparency). An alternative is to use hollow shapes. These are adjustments to make before even worrying about positioning. This addresses the first point as above, which you'll see again in the next exercise.
+
+# Basic scatter plot: wt on x-axis and mpg on y-axis; map cyl to col
+ggplot(mtcars, aes(x = wt, y = mpg, col = cyl))  +
+  geom_point(size = 4)
+
+
+# Hollow circles - an improvement
+ggplot(mtcars, aes(x = wt, y = mpg, col = cyl))  +
+  geom_point(size = 4, shape = 1)
+
+
+# Add transparency - very nice
+ggplot(mtcars, aes(x = wt, y = mpg, col = cyl))  +
+  geom_point(size = 4, alpha = 0.6)
+
+#---------------------------------------------------------------------
+
+Overplotting 2 - alpha with large datasets
+
+In a previous exercise we defined four situations in which you'd have to adjust for overplotting. You'll consider the last two here with the diamonds dataset:
+
+    Large datasets.
+    Aligned data values on a single axis
+
+
+# Scatter plot: carat (x), price (y), clarity (color)
+ggplot(diamonds, aes(x = carat, y = price, col = clarity))  +
+  geom_point()
+
+
+# Adjust for overplotting
+ggplot(diamonds, aes(x = carat, y = price, col = clarity))  +
+  geom_point(alpha = 0.5)
+
+
+# Scatter plot: clarity (x), carat (y), price (color)
+ggplot(diamonds, aes(x = clarity, y = carat, col = price))  +
+  geom_point(alpha = 0.5)
+
+
+# Dot plot with jittering
+ggplot(diamonds, aes(x = clarity, y = carat, col = price))  +
+  geom_point(alpha = 0.5, position = "jitter")
+
+######################################################################
+######################################################################
+
+########  Geometries   (Module 04-012)
+######################################################################
+
+VIDEO
+
+Scatter Plots
+
+37 different geometries
+
+abline
+area
+bar
+bin2d
+blank
+boxplot
+countour
+crossbar
+density
+density2d
+dotplot
+errorbar
+errorbarh
+freqpoly
+hex
+histogram
+hline
+jitter
+line
+linerange
+map
+path
+point
+pointrange
+polygon
+quantile
+raster
+rect
+vline
+ribbon
+rug
+segment
+smooth
+step
+text
+tile
+violin
+
+
+Scatter plots: points, jitter, abline
+bar plots: histogram, bar, errorbar
+Line plots: line
+
+geom_(geometries)
+
+Essential: x, y
+Optional: alpha, colour, fill, shape, size.
+
+You also can introduce data in the geom layer, this is specially usefull if you want to introduce another data points above the top of the data that you already have, like a mean or summary variable
+
+Ex:
+
+ggplot(iris, aes(x = Sepal.Length, y = Sepal.Width, col = Species)) + 
+	geom_point(data = iris.summary, shape = 15, size = 5)
+
+Ex: Crosshairs
+you want to represent mean velue with a line
+
+ggplot(iris, aes(x = Sepal.Length, y = Sepal.Width, col = Species)) + 
+	geom_vline(data = iris.summary, linetype = 2, aes(xintercept = Sepal.Length, col = Species)) +
+	geom_hline(data = iris.summary, linetype = 2, aes(yintercept = Sepal.Width, col = Species))
+
+geom_jitter (jittering points directly)
+
+
+#---------------------------------------------------------------------
+
+Scatter plots and jittering (1)
+
+You already saw a few examples using geom_point() where the result was not a scatter plot. For example, in the plot shown in the viewer a continuous variable, wt, is mapped to the y aesthetic, and a categorical variable, cyl, is mapped to the x aesthetic. This also leads to over-plotting, since the points are arranged on a single x position. You previously dealt with overplotting by setting the position = jitter inside geom_point(). Let's look at some other solutions here.
+
+# Shown in the viewer:
+ggplot(mtcars, aes(x = cyl, y = wt)) +
+  geom_point()
+
+# Solutions:
+# 1 - With geom_jitter()
+ggplot(mtcars, aes(x = cyl, y = wt)) +
+  geom_jitter()
+
+# 2 - Set width in geom_jitter()
+ggplot(mtcars, aes(x = cyl, y = wt)) +
+  geom_jitter(width = 0.1)
+
+# 3 - Set position = position_jitter() in geom_point() ()
+ggplot(mtcars, aes(x = cyl, y = wt)) +
+  geom_point(position = position_jitter(0.1))
+
+#---------------------------------------------------------------------
+Scatter plots and jittering (2)
+
+In the chapter on aesthetics you saw different ways in which you will have to compensate for overplotting. In the video you saw a dataset that suffered from overplotting because of the precision of the dataset.
+
+Another example you saw is when you have integer data. This can be continuous data measured on an integer (i.e. 1 ,2, 3 ...), as opposed to numeric (i.e. 1.1, 1.4, 1.5, ...), scale, or two categorical (e.g. factor) variables, which are just type integer under-the-hood.
+
+In such a case you'll have a small, defined number of intersections between the two variables.
+
+You will be using the Vocab dataset. The Vocab dataset contains information about the years of education and integer score on a vocabulary test for over 21,000 individuals based on US General Social Surveys from 1972-2004.
+
+# Examine the structure of Vocab
+str(Vocab)
+
+# Basic scatter plot of vocabulary (y) against education (x). Use geom_point()
+ggplot(Vocab, aes(x = education, y = vocabulary)) +
+  geom_point()
+
+# Use geom_jitter() instead of geom_point()
+ggplot(Vocab, aes(x = education, y = vocabulary)) +
+  geom_jitter()
+
+
+# Using the above plotting command, set alpha to a very low 0.2
+ggplot(Vocab, aes(x = education, y = vocabulary)) +
+  geom_jitter(alpha = 0.2)
+
+
+# Using the above plotting command, set the shape to 1
+ggplot(Vocab, aes(x = education, y = vocabulary)) +
+  geom_jitter(alpha = 0.2, shape = 1)
+
+#---------------------------------------------------------------------
+
+Video
+
+Bar Plots
+
+################# Histogram
+
+ggplot(iris, aes(x = Sepal.Width)) +
+	geom_histogram()
+
+#It has a default 'binwidth = x' of range/30
+
+diff(range(iris$Sepal.Width))
+#= 0.08
+
+#change width
+
+ggplot(iris, aes(x = Sepal.Width)) +
+	geom_histogram(binwidth = 0.1)
+
+#density (?)
+
+ggplot(iris, aes(x = Sepal.Width)) +
+	geom_histogram(aes(y = ..density..), binwidth = 0.1)
+
+# Different species
+
+ggplot(iris, aes(x = Sepal.Width, fill = Species)) +
+	geom_histogram(aes(y = ..density..), binwidth = 0.1)
+
+#It is not clear if bar are overlapping or just stack each other... the default is that they're stack
+
+ggplot(iris, aes(x = Sepal.Width, fill = Species)) +
+	geom_histogram(aes(y = ..density..), binwidth = 0.1, position = "stack")
+
+#we can dodge our bars
+
+ggplot(iris, aes(x = Sepal.Width, fill = Species)) +
+	geom_histogram(aes(y = ..density..), binwidth = 0.1, position = "dodge")
+
+#fill
+
+ggplot(iris, aes(x = Sepal.Width, fill = Species)) +
+	geom_histogram(aes(y = ..density..), binwidth = 0.1, position = "fill")
+
+################# Bar plot
+
+# geom_bar()
+
+ggplot(sleep, aes(vore)) + geom_bar()
+
+ggplot(sleep, aes(vore)) + geom_bar(stat = "bin")
+
+# Distribution bar plots
+
+library(plyr)
+iris_melted <- melt(iris, value.name = "Value", variable.name = "Measure")
+
+iris_summ <- ddply(iris_melted[iris_melted$Measure == "Sepal.Width",], "Species", summarise, avg = mean(Value), stdev = sd(Value))
+
+str(iris_summ)
+
+ggplot(iris_summ, aes(x = Species, y = avg)) + geom_bar()
+
+# Show a long error messagge
+
+ggplot(iris_summ, aes(x = Species, y = avg)) + geom_bar(stat = "identity")
+
+################# error Bar plot
+
+ggplot(iris_summ, aes(x = Species, y = avg)) + geom_bar(stat = "identity", fill = "grey50") +
+geom_errorbar(aes(ymin = avg - stdev, ymax = avg + stdev), width = 0.2)
+
+# this plot is terrible is a Dynamite Plot
+
+#---------------------------------------------------------------------
+
+Histograms
+
+Histograms are one of the most common and intuitive ways of showing distributions. In this exercise you'll use the mtcars data frame to explore typical variations of simple histograms. But first, some background:
+
+The x axis/aesthetic: The documentation for geom_histogram() states the argument stat = "bin" as a default. Recall that histograms cut up a continuous variable into discrete bins - that's what the stat "bin" is doing. You always get 30 evenly-sized bins by default, which is specified with the default argument binwidth = range/30. This is a pretty good starting point if you don't know anything about the variable being ploted and want to start exploring.
+
+The y axis/aesthetic: geom_histogram() only requires one aesthetic: x. But there is clearly a y axis on your plot, so where does it come from? Actually, there is a variable mapped to the y aesthetic, it's called ..count... When geom_histogram() executed the binning statistic (see above), it not only cut up the data into discrete bins, but it also counted how many values are in each bin. So there is an internal data frame where this information is stored. The .. calls the variable count from this internal data frame. This is what appears on the y aesthetic. But it gets better! The density has also been calculated. This is the proportional frequency of this bin in relation to the whole data set. You use ..density.. to access this information.
+
+# 1 - Make a univariate histogram
+ggplot(mtcars, aes(x = mpg)) +
+  geom_histogram()
+
+# 2 - Plot 1, plus set binwidth to 1 in the geom layer
+ggplot(mtcars, aes(x = mpg)) +
+  geom_histogram(binwidth = 1)
+
+
+# 3 - Plot 2, plus MAP ..density.. to the y aesthetic (i.e. in a second aes() function)
+ggplot(mtcars, aes(x = mpg)) +
+  geom_histogram(aes(y = ..density..), binwidth = 1)
+
+
+# 4 - plot 3, plus SET the fill attribute to "#377EB8"
+ggplot(mtcars, aes(x = mpg)) +
+  geom_histogram(aes(y = ..density..), binwidth = 1, fill = "#377EB8")
+
+#---------------------------------------------------------------------
+
+Position
+
+In the previous chapter you saw that there are lots of ways to position scatter plots. Likewise, the geom_bar() and geom_histogram() geoms also have a position argument, which you can use to specify how to draw the bars of the plot.
+
+Three position arguments will be introduced here:
+
+    stack: place the bars on top of each other. Counts are used. This is the default position.
+    fill: place the bars on top of each other, but this time use proportions.
+    dodge: place the bars next to each other. Counts are used.
+
+In this exercise you'll draw the total count of cars having a given number of cylinders (cyl), according to manual or automatic transmission type (am) - as shown in the viewer.
+
+Since, in the built-in mtcars data set, cyl and am are integers, they have already been converted to factor variables for you.
+
+# Draw a bar plot of cyl, filled according to am
+ggplot(mtcars, aes(x = cyl, fill = am)) +
+  geom_bar()
+
+# Change the position argument to stack
+ggplot(mtcars, aes(x = cyl, fill = am)) +
+  geom_bar(position = "stack")
+
+
+# Change the position argument to fill
+ggplot(mtcars, aes(x = cyl, fill = am)) +
+  geom_bar(position = "fill")
+
+
+# Change the position argument to dodge
+ggplot(mtcars, aes(x = cyl, fill = am)) +
+  geom_bar(position = "dodge")
+
+#---------------------------------------------------------------------
+Overlapping bar plots
+
+So far you've seen three different positions for bar plots: stack (the default), dodge (preferred), and fill (to show proportions).
+
+However, you can go one step further by adjusting the dodging, so that your bars partially overlap each other. For this example you'll again use the mtcars dataset. Like last time cyl and am are already available as factors inside mtcars.
+
+Instead of using position = "dodge" you're going to use position_dodge(), like you did with position_jitter() in the Scatter plots and jittering (1) exercise. Here, you'll save this as an object, posn_d, so that you can easily reuse it.
+
+Remember, the reason you want to use position_dodge() (and position_jitter()) is to specify how much dodging (or jittering) you want.
+
+# 1 - The last plot form the previous exercise
+ggplot(mtcars, aes(x = cyl, fill = am)) +
+  geom_bar(position = "dodge")
+
+# 2 - Define posn_d with position_dodge()
+posn_d <- position_dodge(width = 0.2)
+
+# 3 - Change the position argument to posn_d
+ggplot(mtcars, aes(x = cyl, fill = am)) +
+  geom_bar(position = posn_d)
+
+
+# 4 - Use posn_d as position and adjust alpha to 0.6
+ggplot(mtcars, aes(x = cyl, fill = am)) +
+  geom_bar(position = posn_d, alpha = 0.6)
+
+#---------------------------------------------------------------------
+
+Overlapping histograms
+
+Overlapping histograms pose similar problems to overlapping bar plots, but there is a unique solution here: a frequency polygon.
+
+This is a geom specific to binned data that draws a line connecting the value of each bin. Like geom_histogram(), it takes a binwidth argument and by default stat = "bin" and position = "identity".
+
+# A basic histogram, add coloring defined by cyl
+ggplot(mtcars, aes(mpg, fill = cyl)) +
+  geom_histogram(binwidth = 1)
+
+# Change position to identity
+ggplot(mtcars, aes(mpg, fill = cyl)) +
+  geom_histogram(binwidth = 1, position = "identity")
+
+# Change geom to freqpoly (position is identity by default)
+ggplot(mtcars, aes(mpg, col = cyl)) +
+  geom_freqpoly(binwidth = 1, position = "identity")
+
+#---------------------------------------------------------------------
+
+Bar plots with color ramp, part 1
+
+In this example of a bar plot, you'll fill each segment according to an ordinal variable. The best way to do that is with a sequential color series.
+
+You'll be using the Vocab dataset from earlier. Since this is a much larger dataset with more categories, you'll also compare it to a simpler dataset, mtcars. Both datasets are ordinal.
+
+# Example of how to use a brewed color palette
+ggplot(mtcars, aes(x = cyl, fill = am)) +
+  geom_bar() +
+  scale_fill_brewer(palette = "Set1")
+
+# Use str() on Vocab to check out the structure
+str(Vocab)
+
+# Plot education on x and vocabulary on fill
+# Use the default brewed color palette
+ggplot(Vocab, aes(x = education, fill = vocabulary)) +
+  geom_bar(position = "fill") +
+  scale_fill_brewer(palette = "Set1")
+
+#---------------------------------------------------------------------
+
+Bar plots with color ramp, part 2
+
+In the previous exercise, you ended up with an incomplete bar plot. This was because for continuous data, the default RColorBrewer palette that scale_fill_brewer() calls is "Blues". There are only 9 colours in the palette, and since you have 11 categories, your plot looked strange.
+
+In this exercise, you'll manually create a color palette that can generate all the colours you need. To do this you'll use a function called colorRampPalette().
+
+The input is a character vector of 2 or more colour values, e.g. "#FFFFFF" (white) and "#0000FF" (pure blue). (See this exercise for a discussion on hexadecimal codes).
+
+The output is itself a function! So when you assign it to an object, that object should be used as a function. To see what we mean, execute the following three lines in the console:
+
+new_col <- colorRampPalette(c("#FFFFFF", "#0000FF"))
+new_col(4) # the newly extrapolated colours
+munsell::plot_hex(new_col(4)) # Quick and dirty plot
+
+new_col() is a function that takes one argument: the number of colours you want to extrapolate. You want to use nicer colours, so we've assigned the entire "Blues" colour palette from the RColorBrewer package to the character vector blues.
+
+# Final plot of last exercise
+ggplot(Vocab, aes(x = education, fill = vocabulary)) +
+  geom_bar(position = "fill") +
+  scale_fill_brewer()
+
+# Definition of a set of blue colors
+blues <- brewer.pal(9, "Blues") # from the RColorBrewer package
+
+# 1 - Make a color range using colorRampPalette() and the set of blues
+blue_range <- colorRampPalette(blues)
+
+# 2 - Use blue_range to adjust the color of the bars, use scale_fill_manual()
+ggplot(Vocab, aes(x = education, fill = vocabulary)) +
+  geom_bar(position = "fill") +
+  scale_fill_manual(values = blue_range(11))
+
+#---------------------------------------------------------------------
+
+Overlapping histograms (2)
+
+As a last example of bar plots, you'll return to histograms (which you now see are just a special type of bar plot). You saw a nice trick in a previous exercise of how to slightly overlap bars, but now you'll see how to overlap them completely. This would be nice for multiple histograms, as long as there are not too many different overlaps!
+
+You'll make a histogram using the mpg variable in the mtcars data frame.
+
+# 1 - Basic histogram plot command
+ggplot(mtcars, aes(mpg)) +
+  geom_histogram(binwidth = 1)
+
+# 2 - Plot 1, Expand aesthetics: am onto fill
+ggplot(mtcars, aes(mpg, fill = am)) +
+  geom_histogram(binwidth = 1)
+
+
+# 3 - Plot 2, change position = "dodge"
+ggplot(mtcars, aes(mpg, fill = am)) +
+  geom_histogram(binwidth = 1, position = "dodge")
+
+
+# 4 - Plot 3, change position = "fill"
+ggplot(mtcars, aes(mpg, fill = am)) +
+  geom_histogram(binwidth = 1, position = "fill")
+
+
+# 5 - Plot 4, plus change position = "identity" and alpha = 0.4
+ggplot(mtcars, aes(mpg, fill = am)) +
+  geom_histogram(binwidth = 1, position = "identity", alpha = 0.4)
+
+
+# 6 - Plot 5, plus change mapping: cyl onto fill
+ggplot(mtcars, aes(mpg, fill = cyl)) +
+  geom_histogram(binwidth = 1, position = "identity", alpha = 0.4)
+  
+#---------------------------------------------------------------------
+
+VIDEO
+
+Line Plots - Time Series
+
+geom_line()
+
+str(beaver, aes(x = time, y = temp)) +
+	geom_line()
+
+str(beaver, aes(x = time, y = temp, col = factor(active))) +
+	geom_line()
+
+##fish
+
+ggplot(fish, aes(x = Year, y = Capture, linetype = Species)) +
+	geom_line()
+names(fish)
+
+ggplot(fish, aes(x = Year, y = Capture, size = Species)) +
+	geom_line()
+
+ggplot(fish, aes(x = Year, y = Capture, color = Species)) +
+	geom_line()
+
+### geom_area()
+
+ggplot(fish, aes(x = Year, y = Capture, fill = Species)) +
+	geom_area()
+
+ggplot(fish, aes(x = Year, y = Capture, fill = Species)) +
+	geom_area(position = "fill")
+
+ggplot(fish, aes(x = Year, y = Capture, fill = Species)) +
+	geom_area(position = "fill")
+
+### geom_ribbon()
+
+ggplot(fish, aes(x = Year, y = Capture, fill = Species)) +
+	geom_ribbon(aes(ymax = Capture, ymin = 0), alpha = 0,3)
+	
+	##fish.tidy
+
+ggplot(fish.tidy, aes(x = Year, y = Capture, linetype = Species)) +
+	geom_line()
+names(fish.tidy)
+
+ggplot(fish.tidy, aes(x = Year, y = Capture, size = Species)) +
+	geom_line()
+
+ggplot(fish.tidy, aes(x = Year, y = Capture, color = Species)) +
+	geom_line()
+
+### geom_area()
+
+ggplot(fish.tidy, aes(x = Year, y = Capture, fill = Species)) +
+	geom_area()
+
+ggplot(fish.tidy, aes(x = Year, y = Capture, fill = Species)) +
+	geom_area(position = "fill")
+
+ggplot(fish.tidy, aes(x = Year, y = Capture, fill = Species)) +
+	geom_area(position = "fill")
+
+### geom_ribbon()
+
+ggplot(fish.tidy, aes(x = Year, y = Capture, fill = Species)) +
+	geom_ribbon(aes(ymax = Capture, ymin = 0), alpha = 0,3)
+
+#---------------------------------------------------------------------
+
+Line plots
+
+In the video you saw how to make line plots using time series data. To explore this topic, you'll use the economics data frame, which contains time series for unemployment and population statistics from the Federal Reserve Bank of St. Louis in the US. The data is contained in the ggplot2 package.
+
+To begin with, you can look at how the median unemployment time and the unemployment rate (the number of unemployed people as a proportion of the population) change over time.
+
+In the next exercises, you'll explore to how add embellishments to the line plots, such as recession periods.
+
+# Print out head of economics
+head(economics)
+
+# Plot unemploy as a function of date using a line plot
+ggplot(economics, aes(x = date, y = unemploy)) +
+  geom_line()
+
+
+# Adjust plot to represent the fraction of total population that is unemployed
+ggplot(economics, aes(x = date, y = unemploy/pop)) +
+  geom_line()
+
+#---------------------------------------------------------------------
+
+Periods of recession
+
+By themselves, time series often contain enough valuable information, but you always want to maximize the number of variables you can show in a plot. This allows you (and your viewers) to begin making comparisons between those variables that would otherwise be difficult or impossible.
+
+Here, you'll add shaded regions to the background to indicate recession periods. How do unemployment rate and recession period interact with each other?
+
+In addition to the economics dataset from before, you'll also use the recess dataset for the periods of recession. The recess data frame contains 2 variables: the begin period of the recession and the end. It's already available in your workspace
+
+# Basic line plot
+ggplot(economics, aes(x = date, y = unemploy/pop)) +
+  geom_line()
+
+# Expand the following command with geom_rect() to draw the recess periods
+ggplot(economics, aes(x = date, y = unemploy/pop)) +
+  geom_rect(data = recess,
+         aes(xmin = begin, xmax = end, ymin = -Inf, ymax = +Inf),
+         inherit.aes = FALSE, fill = "red", alpha = 0.2) +
+  geom_line()
+  
+#---------------------------------------------------------------------
+
+Multiple time series, part 1
+
+In the data chapter we discussed how the form of your data affects how you can plot it. Here, you'll explore that topic in the context of multiple time series.
+
+The dataset you'll use contains the global capture rates of seven salmon species from 1950 - 2010.
+
+In your workspace, the following dataset is available:
+
+    fish.species: Each variable (column) is a Salmon Species and each observation (row) is one Year.
+
+To get a multiple time series plot, however, both Year and Species should be in their own column. You need tidy data: one variable per column. Once you have that you can get the plot shown in the viewer by mapping Year to the x aesthetic and Species to the color aesthetic.
+
+You'll use the gather() function of the tidyr package, which is already loaded for you.
+
+
+    Use gather() to move from fish.species to a tidy data frame, fish.tidy. This data frame should have three columns: Year (int), Species (factor) and Capture (int).
+    gather() takes four arguments: the original data frame (fish.species), the name of the key column (Species), the name of the value column (Capture) and the name of the grouping variable, with a minus in front (-Year). They can all be specified as object names (i.e. no "").
+
+
+# Check the structure as a starting point
+str(fish.species)
+
+# Use gather to go from fish.species to fish.tidy
+fish.tidy <- gather(fish.species, Species, Capture, -Year)
+
+#---------------------------------------------------------------------
+
+Multiple time series, part 2
+
+Now that you have tidy data, you're ready to make your plot! The data frame fish.tidy is already available in the workspace, so you can start right away!
+
+# Recreate the plot shown on the right
+ggplot(fish.tidy, aes(x = Year, y = Capture, color = Species)) +
+  geom_line()
+
+######################################################################
+######################################################################
+
+########  qplot and wrap-up  (Module 05-012)
+######################################################################
+
+VIDEO
+
+qplot()
+
+- Easy, quick & dirty
+
+ggplot(iris, aes(x = Sepal.Length, y = Sepal.Width)) + geom_point()
+
+# same plot as
+
+qplot(Sepal.Length, Sepal.Width, data = iris)
+
+#qplot just asume we want a scatterplot
+
+# base package
+
+plot(iris$Sepal.Length, iris$Sepal.Width)
+plot(iris$Sepal.Width ~ iris$Sepal.Length, data = iris)
+
+#qplot it's more flexible than base package
+
+qplot(Sepal.Length, Sepal.Width, data = iris, shape = Species)
+
+qplot(Sepal.Length, Sepal.Width, data = iris, size = Species)
+
+qplot(Sepal.Length, Sepal.Width, data = iris, col = Species)
+
+qplot(Sepal.Length, Sepal.Width, data = iris, col = Species, geom = "jitter")
+
+#same as 
+
+qplot(Sepal.Length, Sepal.Width, data = iris, col = Species, position = "jitter")
+
+qplot(Sepal.Length, Sepal.Width, data = iris, col = Species, position = "jitter", alpha = 0.5)
+
+# qplot thinks 0.5 is a data and not and atribbute so we have to set an I, as an inhibitor of confusion or something like that
+
+qplot(Sepal.Length, Sepal.Width, data = iris, col = Species, position = "jitter", alpha = I(0.5))
+
+# Continous vs categorical
+
+qplot(Species, Value, data = iris.tidy, col = Part)
+
+qplot(Species, Value, data = iris.tidy, col = Part, position = "jitter")
+
+posn.j <- position_jitter(0.1)
+qplot(Species, Value, data = iris.tidy, col = Part, position = posn.j)
+
+#---------------------------------------------------------------------
+
+Using qplot
+
+For simple exploratory plots, there are a variety of functions available. ggplot2 offers a powerful and diverse array of functions, but qplot() allows for quick and dirty plots. Plus, you should also be familiar with basic plotting notation.
+
+# The old way (shown)
+plot(mpg ~ wt, data = mtcars) # formula notation
+with(mtcars, plot(wt, mpg)) # x, y notation
+
+# Using ggplot:
+ggplot(mtcars, aes(x = wt, y = mpg)) +
+  geom_point()
+
+# Using qplot:
+qplot(wt, mpg, data = mtcars)
+
+#---------------------------------------------------------------------
+
+Using aesthetics
+
+You already saw how some aesthetics are only applicable to categorical variables, such as shapes and linetypes. But just because others, such as size and color (and hence fill), can be applied to both categorical and continuous variables, doesn't mean that they're suitable for both.
+
+# basic qplot scatter plot:
+qplot(wt, mpg, data = mtcars)
+
+# Categorical variable mapped onto size:
+# cyl
+qplot(wt, mpg, data = mtcars, size = factor(cyl))
+
+# gear
+qplot(wt, mpg, data = mtcars, size = factor(gear))
+
+# Continuous variable mapped onto col:
+# hp
+qplot(wt, mpg, data = mtcars, color = hp)
+
+# qsec
+qplot(wt, mpg, data = mtcars, color = qsec)
+
+#---------------------------------------------------------------------
+
+Choosing geoms, part 1
+
+qplot automatically takes care of assigning a geom to our plot given the type of data, but you can specify the geom yourselves.
+
+# qplot() with x only
+qplot(factor(cyl), data = mtcars)
+
+# qplot() with x and y
+qplot(factor(cyl), factor(vs), data = mtcars)
+
+# qplot() with geom set to jitter manually
+qplot(factor(cyl), factor(vs), data = mtcars,  geom = "jitter")
+
+#---------------------------------------------------------------------
+
+Choosing geoms, part 2 - dotplot
+
+Some naming conventions:
+
+    Scatter plots:
+    Continuous x, continuous y.
+    Dot plots:
+    Categorical x, continuous y.
+
+You use geom_point() for both plot types. Jittering position is set in the geom_point() layer.
+
+However, to make a "true" dot plot, you can use geom_dotplot(). The difference is that unlike geom_point(), geom_dotplot() uses a binning statistic. Binning means to cut up a continuous variable (the y in this case) into discrete "bins". You already saw binning with geom_histogram() (see this exercise for a refresher).
+
+One thing to notice is that geom_dotplot() uses a different plotting symbol to geom_point(). For these symbols, the color aesthetic changes the color of its border, and the fill aesthetic changes the color of its interior.
+
+Let's take a look at how the two geoms compare.
+
+# cyl and am are factors, wt is numeric
+class(mtcars$cyl)
+class(mtcars$am)
+class(mtcars$wt)
+
+# "Basic" dot plot, with geom_point():
+ggplot(mtcars, aes(cyl, wt, col = am)) +
+  geom_point(position = position_jitter(0.2, 0))
+
+# 1 - "True" dot plot, with geom_dotplot():
+ggplot(mtcars, aes(cyl, wt, fill = am)) +
+  geom_dotplot(binaxis = "y", stackdir = "center")
+
+# 2 - qplot with geom "dotplot", binaxis = "y" and stackdir = "center"
+qplot(
+  cyl, wt,
+  data = mtcars,
+  fill = am,
+  geom = "dotplot",
+  binaxis = "y",
+  stackdir = "center"
+)
+
+#---------------------------------------------------------------------
+
+VIDEO 
+
+Wrap-up
+
+#---------------------------------------------------------------------
+
+Chicken weight
+
+The ChickWeight dataset is a data frame which represents the progression of weight of several chicks. The little chicklings are each given a specific diet. There are four types of diet and the farmer wants to know which one fattens the chicks the fastest.
+
+It's time to do some exploratory statistics on the data frame using the techniques you learned in this course! Let's do some ggplot-ing!
+
+# ChickWeight is available in your workspace
+# 1 - Check out the head of ChickWeight
+head(ChickWeight)
+
+# 2 - Basic line plot
+ggplot(ChickWeight, aes(x = Time, y = weight)) +
+  geom_line(aes(group = Chick))
+
+# 3 - Take plot 2, map Diet onto col.
+ggplot(ChickWeight, aes(x = Time, y = weight, color = Diet)) +
+  geom_line(aes(group = Chick))
+
+
+# 4 - Take plot 3, add geom_smooth()
+ggplot(ChickWeight, aes(x = Time, y = weight, color = Diet)) +
+  geom_line(aes(group = Chick, alpha = 0.3)) +
+  geom_smooth(lwd = 2, se = FALSE)
+  
+#---------------------------------------------------------------------
+
+Titanic
+
+You've watched the movie Titanic by James Cameron (1997) again and after a good portion of sobbing you decide to investigate whether you'd have a chance of surviving this disaster.
+
+To start your investigation, you decide to do some exploratory visualization with ggplot(). You have information on who survived the sinking given their age, sex and passenger class.
+
+# titanic is avaliable in your workspace
+# 1 - Check the structure of titanic
+str(titanic)
+
+# 2 - Use ggplot() for the first instruction
+ggplot(titanic, aes(x = Pclass, fill = Sex)) +
+  geom_bar(position = "dodge")
+
+# 3 - Plot 2, add facet_grid() layer
+ggplot(titanic, aes(x = Pclass, fill = Sex)) +
+  geom_bar(position = "dodge") +
+  facet_grid(.~ Survived)
+
+# 4 - Define an object for position jitterdodge, to use below
+posn.jd <- position_jitterdodge(0.5, 0, 0.6)
+
+# 5 - Plot 3, but use the position object from instruction 4
+ggplot(titanic, aes(x = Pclass, y = Age, color = Sex)) +
+  geom_point(position = posn.jd, size = 3, alpha = 0.5) +
+  facet_grid(.~ Survived)
+
+END

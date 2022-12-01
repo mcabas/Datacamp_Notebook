@@ -1,0 +1,886 @@
+######################################################################
+######################################################################
+######################################################################
+
+# COURSE 009_Data Manipulation with dplyr in R
+
+######################################################################
+######################################################################
+######################################################################
+
+########  Transforming Data with dplyr   (Module 01-009)
+
+The counties dataset
+
+select()
+filter()
+arrange()
+mutate()
+
+The counties dataset
+
+counties data (download)
+glimpse(counties)
+
+#Select
+
+counties %>%
+	select(state, county, population, unemployment)
+
+counties_selected <- counties %>%
+	select(state, county, population, unemployment)
+	
+Understanding your data
+
+Take a look at the counties dataset using the glimpse() function.
+
+What is the first value in the income variable?
+
+glimpse(counties)
+
+Selecting columns
+
+Select the following four columns from the counties variable:
+
+    state
+    county
+    population
+    poverty
+
+You don't need to save the result to a variable.
+
+# Select the columns 
+counties %>%
+  select(state, county, population, poverty)
+  
+######
+
+The counties dataset
+
+select()
+filter()
+arrange()
+mutate()
+
+The counties dataset
+
+counties data (download)
+glimpse(counties)
+
+#Select
+
+counties %>%
+	select(state, county, population, unemployment)
+
+counties_selected <- counties %>%
+	select(state, county, population, unemployment)
+
+#arrange
+
+counties_selected %>%
+	arrange(population)
+
+counties_selected %>%
+	arrange(desc(population))
+
+#Filter
+counties_selected %>%
+	arrange(desc(population))
+	filter(state == "New York")
+
+counties_selected %>%
+	arrange(desc(population))
+	filter(unemployment < 6)
+
+#Filter 2 times
+counties_selected %>%
+	arrange(desc(population))
+	filter(state == "New York", unemployment < 6)
+
+
+######
+
+  
+Arranging observations
+
+Here you see the counties_selected dataset with a few interesting variables selected. These variables: private_work, public_work, self_employed describe whether people work for the government, for private companies, or for themselves.
+
+In these exercises, you'll sort these observations to find the most interesting cases.
+
+counties_selected <- counties %>%
+  select(state, county, population, private_work, public_work, self_employed)
+
+# Add a verb to sort in descending order of public_work
+counties_selected %>%
+  arrange(desc(public_work))
+  
+Filtering for conditions
+
+You use the filter() verb to get only observations that match a particular condition, or match multiple conditions.
+
+STEP 01
+
+counties_selected <- counties %>%
+  select(state, county, population)
+
+# Filter for counties with a population above 1000000
+counties_selected %>%
+  filter(population > 1000000)
+  
+STEP 02
+
+counties_selected <- counties %>%
+  select(state, county, population)
+
+# Filter for counties in the state of California that have a population above 1000000
+counties_selected %>%
+  filter(state == "California", population > 1000000)
+  
+  Filtering and arranging
+
+We're often interested in both filtering and sorting a dataset, to focus on observations of particular interest to you. Here, you'll find counties that are extreme examples of what fraction of the population works in the private sector.
+
+counties_selected <- counties %>%
+  select(state, county, population, private_work, public_work, self_employed)
+
+# Filter for Texas and more than 10000 people; sort in descending order of private_work
+counties_selected %>%
+  filter(state == "Texas", population > 10000) %>%
+  arrange(desc(private_work))
+  
+#####
+
+
+#Mutate
+
+counties_selected <- counties %>%
+	select(state, county, population, unemployment)
+
+Total number of unemployed people
+
+population * unemployment / 100
+
+counties_selected %>%
+	mutate(unemployed_population = population * unemployment / 100)
+
+
+#####
+
+Calculating the number of government employees
+
+In the video, you used the unemployment variable, which is a percentage, to calculate the number of unemployed people in each county. In this exercise, you'll do the same with another percentage variable: public_work.
+
+The code provided already selects the state, county, population, and public_work columns.
+
+STEP 01
+
+counties_selected <- counties %>%
+  select(state, county, population, public_work)
+
+# Add a new column public_workers with the number of people employed in public work
+counties_selected %>%
+  mutate(public_workers = population * public_work / 100)
+  
+STEP 02
+
+counties_selected <- counties %>%
+  select(state, county, population, public_work)
+
+# Sort in descending order of the public_workers column
+counties_selected %>%
+  mutate(public_workers = public_work * population / 100) %>%
+  arrange(desc(public_workers)) 
+
+Calculating the percentage of women in a county
+
+The dataset includes columns for the total number (not percentage) of men and women in each county. You could use this, along with the population variable, to compute the fraction of men (or women) within each county.
+
+In this exercise, you'll select the relevant columns yourself.
+
+# Select the columns state, county, population, men, and women
+counties_selected <- counties %>%
+  select(state, county, population, men, women)
+  
+
+# Calculate proportion_women as the fraction of the population made up of women
+counties_selected %>%
+  mutate(proportion_women =  women / population)
+  
+Select, mutate, filter, and arrange
+
+In this exercise, you'll put together everything you've learned in this chapter (select(), mutate(), filter() and arrange()), to find the counties with the highest proportion of men.
+
+counties %>%
+  # Select the five columns 
+	select(state, county, population, men, women) %>%
+  # Add the proportion_men variable
+  mutate(proportion_men =  men / population) %>%
+  # Filter for population of at least 10,000
+  filter(population >= 10000) %>%
+  # Arrange proportion of men in descending order 
+  arrange(desc(proportion_men))
+
+######################################################################
+######################################################################
+######################################################################
+
+########  Aggregating Data    (Module 02-009)
+
+(I). The count verb
+
+The count verb
+
+Count (find number of observations)
+
+counties %>%
+	count()
+
+counties %>%
+	count(state)
+
+count and sort
+
+counties %>%
+	count(state, sort = TRUE)
+
+Count population
+
+
+counties %>%
+	count(state, wt = population, sort = TRUE)
+	
+	###
+	
+	Counting by region
+
+The counties dataset contains columns for region, state, population, and the number of citizens, which we selected and saved as the counties_selected table. In this exercise, you'll focus on the region column.
+
+counties_selected <- counties %>%
+  select(region, state, population, citizens)
+
+# Use count to find the number of counties in each region
+counties_selected %>%
+  count(region, sort = TRUE)
+  
+  Counting citizens by state
+
+You can weigh your count by particular variables rather than finding the number of counties. In this case, you'll find the number of citizens in each state.
+
+counties_selected <- counties %>%
+  select(region, state, population, citizens)
+
+# Find number of counties per state, weighted by citizens
+counties_selected %>%
+ 	count(state, wt = citizens , sort = TRUE)
+ 	
+Mutating and counting
+
+You can combine multiple verbs together to answer increasingly complicated questions of your data. For example: "What are the US states where the most people walk to work?"
+
+You'll use the walk column, which offers a percentage of people in each county that walk to work, to add a new column and count based on it.
+
+counties_selected <- counties %>%
+  select(region, state, population, walk)
+
+counties_selected %>%
+  # Add population_walk containing the total number of people who walk to work 
+  mutate(population_walk = population * walk / 100) %>%
+  # Count weighted by the new column
+  count(state, wt = population_walk, sort = TRUE)
+  
+####
+
+The group by, summarize and ungroup verbs
+
+Summarize
+
+counties %>%
+	summarize(total_population = sum(population))
+
+Aggregate and summarize
+
+counties %>%
+	summarize(total_population = sum(population),
+	average_unemployment = mean(unemployment))
+
+Summary functions
+sum()
+mean()
+median()
+min()
+max()
+n() "size of the group"
+
+counties %>%
+	group_by(state) %>%
+	summarize(total_population = sum(population),
+		average_unemployment = mean(unemployment)) %>%
+	arrange(desc(average_unemployment))
+
+Metro column
+
+counties %>%
+	select(state, metrom county, population)
+
+counties %>%
+	group_by(state, metro) %>%
+	summarize(total_population = sum(population))
+
+counties %>%
+	group_by(state, metro) %>%
+	summarize(total_population = sum(population))
+	ungroup()####
+
+The group by, summarize and ungroup verbs
+
+Summarize
+
+counties %>%
+	summarize(total_population = sum(population))
+
+Aggregate and summarize
+
+counties %>%
+	summarize(total_population = sum(population),
+	average_unemployment = mean(unemployment))
+
+Summary functions
+sum()
+mean()
+median()
+min()
+max()
+n() "size of the group"
+
+counties %>%
+	group_by(state) %>%
+	summarize(total_population = sum(population),
+		average_unemployment = mean(unemployment)) %>%
+	arrange(desc(average_unemployment))
+
+Metro column
+
+counties %>%
+	select(state, metrom county, population)
+
+counties %>%
+	group_by(state, metro) %>%
+	summarize(total_population = sum(population))
+
+counties %>%
+	group_by(state, metro) %>%
+	summarize(total_population = sum(population))
+	ungroup()
+	
+####
+
+Summarizing
+
+The summarize() verb is very useful for collapsing a large dataset into a single observation.
+
+counties_selected <- counties %>%
+  select(county, population, income, unemployment)
+  
+  # Summarize to find minimum population, maximum unemployment, and average income
+counties_selected %>%
+  summarize(min_population = min(population),
+	max_unemployment = max(unemployment),
+	average_income = mean(income))
+
+Summarizing by state
+
+Another interesting column is land_area, which shows the land area in square miles. Here, you'll summarize both population and land area by state, with the purpose of finding the density (in people per square miles).
+
+counties_selected <- counties %>%
+  select(state, county, population, land_area)
+
+STEP 01
+
+# Group by state and find the total area and population
+counties_selected %>%
+  group_by(state) %>%
+	summarize(total_area = sum(land_area),
+	          total_population = sum(population))
+
+
+STEP 02
+
+# Add a density column, then sort in descending order
+counties_selected %>%
+  group_by(state) %>%
+  summarize(total_area = sum(land_area),
+            total_population = sum(population)) %>%
+  mutate(density = total_population / total_area) %>%
+  arrange(desc(density))
+  
+Summarizing by state and region
+
+You can group by multiple columns instead of grouping by one. Here, you'll practice aggregating by state and region, and notice how useful it is for performing multiple aggregations in a row.
+
+counties_selected <- counties %>%
+  select(region, state, county, population)
+
+# Summarize to find the total population
+counties_selected %>%
+  group_by(region, state) %>%
+  summarize(total_pop = sum(population))
+
+# Calculate the average_pop and median_pop columns 
+counties_selected %>%
+  group_by(region, state) %>%
+  summarize(total_pop = sum(population)) %>%
+  summarize(average_pop = mean(total_pop),
+            median_pop = median(total_pop))
+            
+####
+
+The top_n verb
+
+counties_selected <- counties %>%
+	select(state, county, population, unemployment, income)
+
+
+counties_selected %>%
+	group_by(state) %>%
+	top_n(1, population)
+
+counties_selected %>%
+	group_by(state) %>%
+	top_n(1, unemployment)
+
+counties_selected %>%
+	group_by(state) %>%
+	top_n(3, unemployment)
+# 3 counties with highest unemployment
+
+###
+
+Selecting a county from each region
+
+Previously, you used the walk column, which offers a percentage of people in each county that walk to work, to add a new column and count to find the total number of people who walk to work in each county.
+
+Now, you're interested in finding the county within each region with the highest percentage of citizens who walk to work.
+
+counties_selected <- counties %>%
+  select(region, state, county, metro, population, walk)
+
+# Group by region and find the greatest number of citizens who walk to work
+counties_selected %>%
+  group_by(region) %>%
+  top_n(1, walk)
+  
+Finding the highest-income state in each region
+
+You've been learning to combine multiple dplyr verbs together. Here, you'll combine group_by(), summarize(), and top_n() to find the state in each region with the highest income.
+
+When you group by multiple columns and then summarize, it's important to remember that the summarize "peels off" one of the groups, but leaves the rest on. For example, if you group_by(X, Y) then summarize, the result will still be grouped by X.
+
+counties_selected <- counties %>%
+  select(region, state, county, population, income)
+  
+counties_selected %>%
+  group_by(region, state) %>%
+  # Calculate average income
+  summarize(average_income = mean(income)) %>%
+  # Find the highest income state in each region
+  top_n(1, average_income)
+
+Using summarize, top_n, and count together
+
+In this chapter, you've learned to use five dplyr verbs related to aggregation: count(), group_by(), summarize(), ungroup(), and count(). In this exercise, you'll use all of them to answer a question: In how many states do more people live in metro areas than non-metro areas?
+
+Recall that the metro column has one of the two values "Metro" (for high-density city areas) or "Nonmetro" (for suburban and country areas).
+
+counties_selected <- counties %>%
+  select(state, metro, population)
+
+STEP 01
+
+# Find the total population for each combination of state and metro
+counties_selected %>%
+  group_by(state, metro) %>%
+  summarize(total_pop = sum(population))
+
+STEP 02
+
+# Extract the most populated row for each state
+counties_selected %>%
+  group_by(state, metro) %>%
+  summarize(total_pop = sum(population)) %>%
+  top_n(1, total_pop) 
+
+STEP 03
+
+# Count the states with more people in Metro or Nonmetro areas
+counties_selected %>%
+  group_by(state, metro) %>%
+  summarize(total_pop = sum(population)) %>%
+  top_n(1, total_pop)  %>%
+  ungroup()  %>%
+  count(metro)
+  
+
+######################################################################
+######################################################################
+######################################################################
+
+########  Selecting and Transforming Data    (Module 03-009)
+
+Selecting
+
+counties %>%
+	select(states, county, drive:work_at_home)
+	arrange(drive)
+
+-contains
+
+counties %>%
+	select(states, county, contains("work"))
+	
+-Start with
+
+counties %>%
+	select(states, county, starts_with("income"))
+
+Other select helpers
+
+contains()
+starts_with()
+ends_with()
+last_col()
+
+?select_helpers
+
+#quitar columnas con select
+counties %>%
+	select(-census_id)
+
+####
+
+Selecting columns
+
+Using the select verb, we can answer interesting questions about our dataset by focusing in on related groups of verbs. The colon (:) is useful for getting many columns at a time.
+
+# Glimpse the counties table
+glimpse(counties)
+
+counties %>%
+  # Select state, county, population, and industry-related columns
+  select(state, county, population, professional:production) %>%
+  # Arrange service in descending order 
+  arrange(desc(service))
+  
+  Select helpers
+
+In the video you learned about the select helper starts_with(). Another select helper is ends_with(), which finds the columns that end with a particular string.
+
+counties %>%
+  # Select the state, county, population, and those ending with "work"
+  select(state, county, population, ends_with("work")) %>%
+  # Filter for counties that have at least 50% of people engaged in public work
+  filter(public_work >= 50)
+  
+  ####
+  
+  The rename verb
+
+
+counties_selected <- counties %>%
+	select(state, county, population, unemployment)
+
+counties_selected %>%
+	rename(unemployment_rate = unemployment)
+
+-combine verbs
+
+counties_selected <- counties %>%
+	select(state, county, population, unemployment_rate = unemployment)
+####
+
+Renaming a column after count
+
+The rename() verb is often useful for changing the name of a column that comes out of another verb, such as count(). In this exercise, you'll rename the n column from count() (which you learned about in Chapter 2) to something more descriptive.
+
+# Count the number of counties in each state
+counties %>%
+  count(state)
+  
+# Rename the n column to num_counties
+counties %>%
+  count(state) %>%
+  rename(num_counties = n)
+  
+Renaming a column as part of a select
+
+rename() isn't the only way you can choose a new name for a column: you can also choose a name as part of a select().
+
+# Select state, county, and poverty as poverty_rate
+counties %>%
+  select(state, county, poverty_rate = poverty)
+  
+The transmute verb
+-It's a combinarion: select & mutate
+-Returns a subset of columns that are transformed and changed
+
+counties %>%
+	transmute(state, county, fraction_men = men / population)
+
+counties %>%
+	transmute(state, county, population, unemployed_people = population * unemployment / 100)
+
+Summary
+
+		/Keeps only 		/Keep other
+		specified variables	variables
+Can't changes	select()		remane()
+Values
+
+Can change	transmute()		mutate()
+Values	
+
+####
+
+Using transmute
+
+As you learned in the video, the transmute verb allows you to control which variables you keep, which variables you calculate, and which variables you drop.
+
+counties %>%
+  # Keep the state, county, and populations columns, and add a density column
+  transmute(state, county, population, density = population / land_area) %>%
+  # Filter for counties with a population greater than one million 
+  filter(population > 1000000) %>%
+  # Sort density in ascending order 
+  arrange(density)
+  
+  Choosing among the four verbs
+
+In this chapter you've learned about the four verbs: select, mutate, transmute, and rename. Here, you'll choose the appropriate verb for each situation. You won't need to change anything inside the parentheses.
+
+# Change the name of the unemployment column
+counties %>%
+  rename(unemployment_rate = unemployment)
+
+# Keep the state and county columns, and the columns containing poverty
+counties %>%
+  select(state, county, contains("poverty"))
+
+# Calculate the fraction_women column without dropping the other columns
+counties %>%
+  mutate(fraction_women = women / population)
+
+# Keep only the state, county, and employment_rate columns
+counties %>%
+  transmute(state, county, employment_rate = employed / population)
+
+######################################################################
+######################################################################
+######################################################################
+
+########  Case Study: The babynames Dataset  (Module 04-009)
+
+Work proyect.
+
+video (1)
+
+babynames  %>%
+	filter(name == "Michael")
+library(ggplot2)
+
+babynames_filtered <- babynames  %>%
+	filter(name == "Michael")
+
+ggplot(babynames_filtered, aes(x = year, y = number)) + geom_line()
+
+### Filter for multiple names
+
+babynames_filtered <- babynames  %>%
+	filter(name %in% c("Andres", "Michael"))
+
+
+babynames  %>%
+	group_by(name)  %>%
+	top_n(1, number)
+	
+#########
+
+Filtering and arranging for one year
+
+The dplyr verbs you've learned are useful for exploring data. For instance, you could find out the most common names in a particular year.
+
+babynames %>%
+  # Filter for the year 1990
+    filter(year == "1990") %>%
+  # Sort the number column in descending order 
+    arrange(desc(number))
+    
+Using top_n with babynames
+
+You saw that you could use filter() and arrange() to find the most common names in one year. However, you could also use group_by and top_n to find the most common name in every year.
+
+# Find the most common name in each year
+babynames %>%
+  	group_by(year)  %>%
+	  top_n(1, number)
+
+Visualizing names with ggplot2
+
+The dplyr package is very useful for exploring data, but it's especially useful when combined with other tidyverse packages like ggplot2.
+
+# Filter for the names Steven, Thomas, and Matthew 
+selected_names <- babynames %>%
+  filter(name %in% c("Steven", "Thomas", "Matthew"))
+
+# Plot the names using a different color for each name
+ggplot(selected_names, aes(x = year, y = number, color = name)) +
+  geom_line()
+
+####
+####
+
+babynames  %>%
+	group_by(year)  %>%
+	summarize(year_total = sum(number))
+
+babynames  %>%
+	group_by(year)  %>%
+	mutate(year_total = sum(number)) %>%
+	ungroup() %>%
+	mutate(fraction = number / year_total)
+
+####
+
+Finding the year each name is most common
+
+In an earlier video, you learned how to filter for a particular name to determine the frequency of that name over time. Now, you're going to explore which year each name was the most common.
+
+To do this, you'll be combining the grouped mutate approach with a top_n.
+
+# Find the year each name is most common 
+babynames %>%
+  group_by(year) %>%
+  mutate(year_total = sum(number)) %>%
+  ungroup() %>%
+  mutate(fraction = number / year_total)  %>%
+  group_by(name) %>%
+  top_n(1, fraction)
+  
+Adding the total and maximum for each name
+
+In the video, you learned how you could group by the year and use mutate() to add a total for that year.
+
+In these exercises, you'll learn to normalize by a different, but also interesting metric: you'll divide each name by the maximum for that name. This means that every name will peak at 1.
+
+Once you add new columns, the result will still be grouped by name. This splits it into 48,000 groups, which actually makes later steps like mutates slower.
+
+STEP 01
+
+# Add columns name_total and name_max for each name
+babynames %>%
+  group_by(name)  %>%
+	mutate(name_total = sum(number), name_max = max(number))
+	
+STEP 02
+
+babynames %>%
+  group_by(name) %>%
+  mutate(name_total = sum(number),
+         name_max = max(number)) %>%
+  # Ungroup the table 
+  ungroup() %>%
+  # Add the fraction_max column containing the number by the name maximum 
+  mutate(fraction_max = number / name_max)
+  
+  Visualizing the normalized change in popularity
+
+You picked a few names and calculated each of them as a fraction of their peak. This is a type of "normalizing" a name, where you're focused on the relative change within each name rather than the overall popularity of the name.
+
+In this exercise, you'll visualize the normalized popularity of each name. Your work from the previous exercise, names_normalized, has been provided for you.
+
+names_normalized <- babynames %>%
+                     group_by(name) %>%
+                     mutate(name_total = sum(number),
+                            name_max = max(number)) %>%
+                     ungroup() %>%
+                     mutate(fraction_max = number / name_max)
+                     
+# Filter for the names Steven, Thomas, and Matthew
+names_filtered <- names_normalized %>%
+  filter(name %in% c("Steven", "Thomas", "Matthew"))
+
+# Visualize these names over time
+ggplot(names_filtered, aes(x = year, y = fraction_max, color = name)) +
+  geom_line()
+
+####
+
+#Window functions
+
+v <- c(1, 3, 6, 14)
+v
+[1] 1 3 6 14
+lag(v)
+[1] NA 1 3 6
+
+
+v - lag(v)
+#what is each value before each one, and 
+track changes.
+
+babynames_fraction <- babynames  %>%
+	group_by(year)  %>%
+	mutate(year_total = sum(number)) %>%
+	ungroup() %>%
+	mutate(fraction = number / year_total)
+
+babynames_fraction %>%
+	filter(name == "Matthew") %>%
+	arrange(year) %>%
+	mutate(difference = fraction - lag(fraction)) %>%
+#jumps when mathew was more popular
+	arrange(desc(difference))
+
+
+#for every name
+babynames_fraction %>%
+	arrange(name, year) %>%
+	mutate(difference = fraction - lag(fraction)) %>%
+	group_by(name)  %>%
+	arrange(desc(difference))
+	
+	####
+	
+	Using ratios to describe the frequency of a name
+
+In the video, you learned how to find the difference in the frequency of a baby name between consecutive years. What if instead of finding the difference, you wanted to find the ratio?
+
+You'll start with the babynames_fraction data already, so that you can consider the popularity of each name within each year.
+
+babynames_fraction %>%
+  # Arrange the data in order of name, then year 
+	arrange(name, year) %>%
+  # Group the data by name
+  group_by(name)  %>%
+  # Add a ratio column that contains the ratio between each year 
+  mutate(ratio = fraction / lag(fraction))
+  
+Biggest jumps in a name
+
+Previously, you added a ratio column to describe the ratio of the frequency of a baby name between consecutive years to describe the changes in the popularity of a name. Now, you'll look at a subset of that data, called babynames_ratios_filtered, to look further into the names that experienced the biggest jumps in popularity in consecutive years. 
+
+babynames_ratios_filtered <- babynames_fraction %>%
+                     arrange(name, year) %>%
+                     group_by(name) %>%
+                     mutate(ratio = fraction / lag(fraction)) %>%
+                     filter(fraction >= 0.00001)
+                     
+babynames_ratios_filtered %>%
+  # Extract the largest ratio from each name 
+  top_n(1, ratio) %>%
+  # Sort the ratio column in descending order 
+  arrange(desc(ratio)) %>%
+  # Filter for fractions greater than or equal to 0.001
+  filter(fraction >= 0.001)
+  
+  END
+
+                     

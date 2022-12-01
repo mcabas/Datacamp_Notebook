@@ -1,0 +1,836 @@
+######################################################################
+######################################################################
+######################################################################
+
+# COURSE 016_Exploratory Data Analysis in R (EDA)
+
+######################################################################
+######################################################################
+######################################################################
+
+######## Exploring Categorical Data (Module 01-016)
+######################################################################
+
+
+Exploring  categorical data
+
+#Comics dataset
+comics
+levels(comics$align) 
+levels(comics$id) # Note: NAs ignored by levels() function
+table(comics$id, comics$align) 
+ggplot(comics, aes(x = id, fill = align)) +   geom_bar()
+
+#---------------------------------------------------------------------
+
+Bar chart expectations
+
+Suppose you've asked 30 people, some young, some old, what their preferred flavor of pie is: apple or pumpkin. That data could be summarized in a side-by-side barchart. Here are three possibilities for how it might look.
+
+Which one of the barcharts shows no relationship between age and flavor? In other words, which shows that pie preference is the same for both young and old?
+
+plot 1 xD
+
+#---------------------------------------------------------------------
+
+Contingency table review
+
+In this chapter you'll continue working with the comics dataset introduced in the video. This is a collection of characteristics on all of the superheroes created by Marvel and DC comics in the last 80 years.
+
+Let's start by creating a contingency table, which is a useful way to represent the total counts of observations that fall into each combination of the levels of categorical variables.
+
+comics <- read_csv("comics.csv")
+
+comics$align = as.factor(comics$align)
+comics$gender = as.factor(comics$gender)
+
+# Print the first rows of the data
+comics
+
+# Check levels of align
+levels(comics$align)
+
+# Check the levels of gender
+levels(comics$gender) 
+
+# Create a 2-way contingency table
+table(comics$align, comics$gender) 
+
+#---------------------------------------------------------------------
+
+Dropping levels
+
+The contingency table from the last exercise revealed that there are some levels that have very low counts. To simplify the analysis, it often helps to drop such levels.
+
+In R, this requires two steps: first filtering out any rows with the levels that have very low counts, then removing these levels from the factor variable with droplevels(). This is because the droplevels() function would keep levels that have just 1 or 2 counts; it only drops levels that don't exist in a dataset.
+
+# Load dplyr
+library(dplyr)
+
+# Print tab
+tab
+
+# Remove align level
+comics_filtered <- comics %>%
+  filter(align != "Reformed Criminals") %>%
+  droplevels()
+
+# See the result
+comics_filtered
+
+#---------------------------------------------------------------------
+
+Side-by-side barcharts
+
+While a contingency table represents the counts numerically, it's often more useful to represent them graphically.
+
+Here you'll construct two side-by-side barcharts of the comics data. This shows that there can often be two or more options for presenting the same data. Passing the argument position = "dodge" to geom_bar() says that you want a side-by-side (i.e. not stacked) barchart.
+
+# Load ggplot2
+library(ggplot2)
+
+# Create side-by-side barchart of gender by alignment
+ggplot(comics, aes(x = align, fill = gender)) + 
+  geom_bar(position = "dodge")
+
+# Create side-by-side barchart of alignment by gender
+ggplot(comics, aes(x = gender, fill = align)) + 
+  geom_bar(position = "dodge") +
+  theme(axis.text.x = element_text(angle = 90))
+
+#---------------------------------------------------------------------
+
+
+VIDEO
+
+Counts vs.  proportions
+
+# From counts to proportions
+options(scipen = 999, digits = 3) # Simplify display format
+tab_cnt <- table(comics$id, comics$align)
+tab_cnt                     
+
+prop.table(tab_cnt)
+       
+sum(prop.table(tab_cnt))
+[1] 1
+
+# Conditional proportions
+
+prop.table(tab_cnt, 1) # Condition on the rows (i.e. rows sum to 1)
+prop.table(tab_cnt, 2) # Condition on the columns (i.e. columns sum to 1)
+
+ggplot(comics, aes(x = id, fill = align)) +   geom_bar()
+ggplot(comics, aes(x = id, fill = align)) +   geom_bar(position = "fill")
+ggplot(comics, aes(x = id, fill = align)) +   geom_bar(position = "fill") +   ylab("proportion")
+ggplot(comics, aes(x = align, fill = id)) +     geom_bar(position = "fill") +     ylab("proportion")
+
+#---------------------------------------------------------------------
+
+Conditional proportions
+
+The following code generates tables of joint and conditional proportions, respectively:
+
+tab <- table(comics$align, comics$gender)
+options(scipen = 999, digits = 3) # Print fewer digits
+prop.table(tab)     # Joint proportions
+prop.table(tab, 2)  # Conditional on columns
+
+Go ahead and run it in the console. Approximately what proportion of all female characters are good?
+
+#---------------------------------------------------------------------
+
+Counts vs. proportions (2)
+
+Bar charts can tell dramatically different stories depending on whether they represent counts or proportions and, if proportions, what the proportions are conditioned on. To demonstrate this difference, you'll construct two barcharts in this exercise: one of counts and one of proportions.
+
+# Plot of gender by align
+ggplot(comics, aes(x = align, fill = gender)) +
+  geom_bar()
+  
+# Plot proportion of gender, conditional on align
+ggplot(comics, aes(x = align, fill = gender)) + 
+  geom_bar(position = "fill") +
+  ylab("proportion")
+  
+#---------------------------------------------------------------------
+
+#  Distribution of one variable
+
+# Marginal distribution
+table(comics$id)
+tab_cnt <- table(comics$id, comics$align) 
+tab_cnt  
+   
+# Simple barchart
+ggplot(comics, aes(x = id)) +     geom_bar()
+
+#Faceting
+tab_cnt <- table(comics$id, comics$align)
+tab_cnt 
+
+#Faceted barcharts
+ggplot(comics, aes(x = id)) +     geom_bar() +     facet_wrap(~align)
+
+#---------------------------------------------------------------------
+
+Marginal barchart
+
+If you are interested in the distribution of alignment of all superheroes, it makes sense to construct a barchart for just that single variable.
+
+You can improve the interpretability of the plot, though, by implementing some sensible ordering. Superheroes that are "Neutral" show an alignment between "Good" and "Bad", so it makes sense to put that bar in the middle.
+
+# Change the order of the levels in align
+comics$align <- factor(comics$align, 
+                       levels = c("Bad", "Neutral", "Good"))
+
+# Create plot of align
+ggplot(comics, aes(x = align)) + 
+  geom_bar()
+
+#---------------------------------------------------------------------
+
+Conditional barchart
+
+Now, if you want to break down the distribution of alignment based on gender, you're looking for conditional distributions.
+
+You could make these by creating multiple filtered datasets (one for each gender) or by faceting the plot of alignment based on gender. As a point of comparison, we've provided your plot of the marginal distribution of alignment from the last exercise.
+
+# Plot of alignment broken down by gender
+ggplot(comics, aes(x = align)) + 
+  geom_bar() +
+  facet_wrap(~ gender)
+
+#---------------------------------------------------------------------
+
+Improve piechart
+
+The piechart is a very common way to represent the distribution of a single categorical variable, but they can be more difficult to interpret than barcharts.
+
+This is a piechart of a dataset called pies that contains the favorite pie flavors of 98 people. Improve the representation of these data by constructing a barchart that is ordered in descending order of count.
+
+# Put levels of flavor in descending order
+lev <- c("apple", "key lime", "boston creme", "blueberry", "cherry", "pumpkin", "strawberry")
+pies$flavor <- factor(pies$flavor, levels = lev)
+
+# Create barchart of flavor
+ggplot(pies, aes(x = flavor)) + 
+  geom_bar(fill = "chartreuse") + 
+  theme(axis.text.x = element_text(angle = 90))
+
+######################################################################
+######################################################################
+######################################################################
+
+######## Exploring Numerical Data  (Module 02-016)
+######################################################################
+
+
+# Exploring  numerical data
+
+str(cars)
+ggplot(data, aes(x = weight)) +     geom_dotplot(dotsize = 0.4) 
+ggplot(data, aes(x = weight)) +     geom_histogram() 
+ggplot(data, aes(x = weight)) +     geom_density() 
+ggplot(data, aes(x = 1, y = weight)) +     geom_boxplot() +      coord_flip()
+ggplot(cars, aes(x = hwy_mpg)) +     geom_histogram() +     facet_wrap(~pickup) 
+
+#---------------------------------------------------------------------
+
+Faceted histogram
+
+In this chapter, you'll be working with the cars dataset, which records characteristics on all of the new models of cars for sale in the US in a certain year. You will investigate the distribution of mileage across a categorial variable, but before you get there, you'll want to familiarize yourself with the dataset.
+
+cars <- read_csv("cars.csv")
+
+# Load package
+library(ggplot2)
+
+# Learn data structure
+str(cars)
+
+# Create faceted histogram
+ggplot(cars, aes(x = city_mpg)) +
+  geom_histogram() +
+  facet_wrap(~ suv)
+
+#---------------------------------------------------------------------
+
+Boxplots and density plots
+
+The mileage of a car tends to be associated with the size of its engine (as measured by the number of cylinders). To explore the relationship between these two variables, you could stick to using histograms, but in this exercise you'll try your hand at two alternatives: the box plot and the density plot.
+
+unique(cars$ncyl)
+
+# Filter cars with 4, 6, 8 cylinders
+common_cyl <- filter(cars, ncyl %in% c(4, 6, 8))
+
+# Create box plots of city mpg by ncyl
+ggplot(common_cyl, aes(x = as.factor(ncyl), y = city_mpg)) +
+  geom_boxplot()
+
+# Create overlaid density plots for same data
+ggplot(common_cyl, aes(x = city_mpg, fill = as.factor(ncyl))) +
+  geom_density(alpha = .3)
+
+#---------------------------------------------------------------------
+
+# Distribution of  one variable
+
+# Marginal vs. conditional
+ggplot(cars, aes(x = hwy_mpg)) +     geom_histogram() 
+ggplot(cars, aes(x = hwy_mpg)) +     geom_histogram() +     facet_wrap(~pickup) 
+
+# Building a data pipelin
+cars2 <- cars %>%   filter(eng_size < 2.0) 
+ggplot(cars2, aes(x = hwy_mpg)) +   geom_histogram() #is slow
+
+# Filtered and faceted histogram
+cars %>%   
+	filter(eng_size < 2.0) %>%   
+	ggplot(aes(x = hwy_mpg)) +   
+	geom_histogram()
+
+#Wide bin width
+cars %>%   
+	filter(eng_size < 2.0) %>%   
+	ggplot(aes(x = hwy_mpg)) +   
+	geom_histogram(binwidth = 5)
+
+#Density plot
+cars %>%   
+	filter(eng_size < 2.0) %>%   
+	ggplot(aes(x = hwy_mpg)) +   
+	geom_density()
+
+#Wide bandwidth
+cars %>%   
+	filter(eng_size < 2.0) %>%   
+	ggplot(aes(x = hwy_mpg)) +   
+	geom_density(bw = 5)
+
+
+#---------------------------------------------------------------------
+
+Marginal and conditional histograms
+
+Now, turn your attention to a new variable: horsepwr. The goal is to get a sense of the marginal distribution of this variable and then compare it to the distribution of horsepower conditional on the price of the car being less than $25,000.
+
+You'll be making two plots using the "data pipeline" paradigm, where you start with the raw data and end with the plot.
+
+# Create hist of horsepwr
+cars %>%
+  ggplot(aes(x = horsepwr)) +
+  geom_histogram() +
+  ggtitle("horse power")
+
+# Create hist of horsepwr for affordable cars
+cars %>% 
+  filter(msrp < 25000) %>%
+  ggplot(aes(x = horsepwr)) +
+  geom_histogram() +
+  xlim(c(90, 550)) +
+  ggtitle("horse power of affordable")
+
+#---------------------------------------------------------------------
+
+Three binwidths
+
+Before you take these plots for granted, it's a good idea to see how things change when you alter the binwidth. The binwidth determines how smooth your distribution will appear: the smaller the binwidth, the more jagged your distribution becomes. It's good practice to consider several binwidths in order to detect different types of structure in your data.
+
+# Create hist of horsepwr with binwidth of 3
+cars %>%
+  ggplot(aes(x = horsepwr)) +
+  geom_histogram(binwidth = 3) +
+  ggtitle("horsepwr 3")
+
+# Create hist of horsepwr with binwidth of 30
+cars %>%
+  ggplot(aes(x = horsepwr)) +
+  geom_histogram(binwidth = 30) +
+  ggtitle("horsepwr 30")
+
+# Create hist of horsepwr with binwidth of 60
+cars %>%
+  ggplot(aes(x = horsepwr)) +
+  geom_histogram(binwidth = 60) +
+  ggtitle("horsepwr 60")
+
+#---------------------------------------------------------------------
+
+Video
+
+#Box plots
+ ggplot(common_cyl, aes(x = as.factor(ncyl), y = city_mpg)) +     geom_boxplot() 
+
+#---------------------------------------------------------------------
+
+Box plots for outliers
+
+In addition to indicating the center and spread of a distribution, a box plot provides a graphical means to detect outliers. You can apply this method to the msrp column (manufacturer's suggested retail price) to detect if there are unusually expensive or cheap cars.
+
+# Construct box plot of msrp
+cars %>%
+  ggplot(aes(x = 1, y = msrp)) +
+  geom_boxplot()
+
+# Exclude outliers from data
+cars_no_out <- cars %>%
+  filter(msrp < 100000)
+
+# Construct box plot of msrp using the reduced dataset
+cars_no_out %>%
+  ggplot(aes(x = 1, y = msrp)) +
+  geom_boxplot()
+
+#---------------------------------------------------------------------
+
+Plot selection
+
+Consider two other columns in the cars dataset: city_mpg and width. Which is the most appropriate plot for displaying the important features of their distributions? Remember, both density plots and box plots display the central tendency and spread of the data, but the box plot is more robust to outliers.
+
+# Create plot of city_mpg
+cars %>%
+  ggplot(aes(x = 1, y = city_mpg)) +
+  geom_boxplot() 
+
+# Create plot of width
+cars %>% 
+  ggplot(aes(x = width)) +
+  geom_density()
+
+#---------------------------------------------------------------------
+
+#Visualization in  higher dimensions
+ggplot(cars, aes(x = msrp)) +     geom_density() +     facet_grid(pickup ~ rear_wheel, labeller = label_both)
+table(cars$rear_wheel, cars$pickup)
+
+#---------------------------------------------------------------------
+
+3 variable plot
+
+Faceting is a valuable technique for looking at several conditional distributions at the same time. If the faceted distributions are laid out in a grid, you can consider the association between a variable and two others, one on the rows of the grid and the other on the columns.
+
+# Facet hists using hwy mileage and ncyl
+common_cyl %>%
+  ggplot(aes(x = hwy_mpg)) +
+  geom_histogram() +
+  facet_grid(ncyl ~ suv) +
+  ggtitle("cyl row, suv col")
+
+######################################################################
+######################################################################
+######################################################################
+
+Characteristics of a distribution
+
+-Center
+-Variability
+-Shape
+-Outliers
+
+######## Numerical Summaries  (Module 03-016)
+######################################################################
+
+#Measures of center
+ life 
+x <- head(round(life$expectancy), 11)
+Center: mean, median, mode
+
+#Groupwise mean
+life <- life %>%     
+	mutate(west_coast = state %in% c("California", "Oregon", "Washington"))
+
+life %>%
+     group_by(west_coast) %>%
+     summarize(mean(expectancy),
+               median(expectancy)) 
+
+#Without group_by()
+life %>%
+     slice(240:247) %>%
+     summarize(mean(expectancy)) 
+
+#With group_by()
+life %>%
+   slice(240:247) %>%
+   group_by(west_coast) %>%
+   summarize(mean(expectancy)) 
+
+#---------------------------------------------------------------------
+
+Calculate center measures
+
+Throughout this chapter, you will use data from gapminder, which tracks demographic data in countries of the world over time. To learn more about it, you can bring up the help file with ?gapminder.
+
+For this exercise, focus on how the life expectancy differs from continent to continent. This requires that you conduct your analysis not at the country level, but aggregated up to the continent level. This is made possible by the one-two punch of group_by() and summarize(), a very powerful syntax for carrying out the same analysis on different subsets of the full dataset.
+
+# Create dataset of 2007 data
+gap2007 <- filter(gapminder, year == 2007)
+
+# Compute groupwise mean and median lifeExp
+gap2007 %>%
+  group_by(continent) %>%
+  summarize(mean(lifeExp),
+            median(lifeExp))
+
+# Generate box plots of lifeExp for each continent
+gap2007 %>%
+  ggplot(aes(x = continent, y = lifeExp)) +
+  geom_boxplot()
+
+#---------------------------------------------------------------------
+
+#Measures of variability
+
+> x - mean(x)  
+[1]  1.4545  3.4545  0.4545 -0.5455  1.4545 -2.5455  
+[7] -0.5455 -1.5455 -1.5455  0.4545 -0.5455 
+> sum(x - mean(x)) 
+[1] -1.421085e-14 
+> sum((x - mean(x))^2) 
+[1] 28.72727 > n <- 11 
+> sum((x - mean(x))^2)/n 
+[1] 2.61157 
+> sum((x - mean(x))^2)/(n - 1) 
+[1] 2.872727 
+# var(x)
+> var(x) 
+[1] 2.872727
+
+sd(x) # Standard deviation 
+[1] 1.694912 #years
+var(x) # Variance 
+[1] 2.872727 #years squared
+summary(x)    
+Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    
+72.00   73.50   74.00   74.55   75.50   78.00  
+IQR(x) # Interquartile range 
+[1] 2 
+diff(range(x)) # Range 
+[1] 6
+
+#---------------------------------------------------------------------
+
+#Measures of variability
+
+> x - mean(x)  
+[1]  1.4545  3.4545  0.4545 -0.5455  1.4545 -2.5455  
+[7] -0.5455 -1.5455 -1.5455  0.4545 -0.5455 
+> sum(x - mean(x)) 
+[1] -1.421085e-14 
+> sum((x - mean(x))^2) 
+[1] 28.72727 > n <- 11 
+> sum((x - mean(x))^2)/n 
+[1] 2.61157 
+> sum((x - mean(x))^2)/(n - 1) 
+[1] 2.872727 
+# var(x)
+> var(x) 
+[1] 2.872727
+
+sd(x) # Standard deviation 
+[1] 1.694912 #years
+var(x) # Variance 
+[1] 2.872727 #years squared
+summary(x)    
+Min. 1st Qu.  Median    Mean 3rd Qu.    Max.    
+72.00   73.50   74.00   74.55   75.50   78.00  
+IQR(x) # Interquartile range 
+[1] 2 
+diff(range(x)) # Range 
+[1] 6
+
+#---------------------------------------------------------------------
+
+Calculate spread measures
+
+Let's extend the powerful group_by() and summarize() syntax to measures of spread. If you're unsure whether you're working with symmetric or skewed distributions, it's a good idea to consider a robust measure like IQR in addition to the usual measures of variance or standard deviation.
+
+# Compute groupwise measures of spread
+gap2007 %>%
+  group_by(continent) %>%
+  summarize(sd(lifeExp),
+            IQR(lifeExp),
+            n())
+
+# Generate overlaid density plots
+gap2007 %>%
+  ggplot(aes(x = lifeExp, fill = continent)) +
+  geom_density(alpha = 0.3)
+
+#---------------------------------------------------------------------
+
+Choose measures for center and spread
+
+Consider the density plots shown here. What are the most appropriate measures to describe their centers and spreads? In this exercise, you'll select the measures and then calculate them.
+
+# Compute stats for lifeExp in Americas
+head(gap2007)
+gap2007 %>%
+  filter(continent == "Americas") %>%
+  summarize(mean(lifeExp),
+            sd(lifeExp))
+
+# Compute stats for population
+gap2007 %>%
+  summarize(median(pop) ,
+            IQR(pop))
+            
+#---------------------------------------------------------------------
+
+#Shape and transformation
+#Modality
+-unimodal
+-bimodal
+-multimodal
+-uniform
+
+#skew
+-right-skewed
+-left-skewed
+-symmetric
+
+Shape of income
+ggplot(life, aes(x = income, fill = west_coast)) + 
+	geom_density(alpha = .3) 
+ggplot(life, aes(x = log(income), fill = west_coast)) + 
+	geom_density(alpha = .3)
+
+#---------------------------------------------------------------------
+
+Transformations
+
+Highly skewed distributions can make it very difficult to learn anything from a visualization. Transformations can be helpful in revealing the more subtle structure.
+
+Here you'll focus on the population variable, which exhibits strong right skew, and transform it with the natural logarithm function (log() in R).
+
+# Create density plot of old variable
+gap2007 %>%
+  ggplot(aes(x = pop)) +
+  geom_density() 
+
+# Transform the skewed pop variable
+gap2007 <- gap2007 %>%
+  mutate(log_pop = log(pop))
+
+# Create density plot of new variable
+gap2007 %>%
+  ggplot(aes(x = log_pop)) +
+  geom_density()
+
+#---------------------------------------------------------------------
+
+
+#Outliers
+
+Characteristics of a distributio
+
+-Center
+-Variability
+-Shape
+-Outliers
+
+# Indicating outliers
+life <- life %>%
+     mutate(is_outlier = income > 75000)
+life %>%
+     filter(is_outlier) %>%
+     arrange(desc(income))
+
+#Ploting without outlier
+life %>%
+     filter(!is_outlier) %>%
+     ggplot(aes(x = income, fill = west_coast)) +
+     geom_density(alpha = .3)
+
+#---------------------------------------------------------------------
+
+Identify outliers
+
+Consider the distribution, shown here, of the life expectancies of the countries in Asia. The box plot identifies one clear outlier: a country with a notably low life expectancy. Do you have a guess as to which country this might be? Test your guess in the console using either min() or filter(), then proceed to building a plot with that country removed.
+
+# Filter for Asia, add column indicating outliers
+gap_asia <- gap2007 %>%
+  filter(continent == "Asia") %>%
+  mutate(is_outlier = lifeExp < 50)
+
+# Remove outliers, create box plot of lifeExp
+gap_asia %>%
+  filter(!is_outlier) %>%
+  ggplot(aes(x = 1, y = lifeExp)) +
+  geom_boxplot()
+
+######################################################################
+######################################################################
+######################################################################
+
+######## Case Study  (Module 04-016)
+######################################################################
+
+#Introducing the data
+
+#Email data set
+
+email
+#Histograms
+ ggplot(data, aes(x = var1)) +     geom_histogram()
+ ggplot(data, aes(x = var1)) +     geom_histogram() +     facet_wrap(~var2)
+#Boxplots
+ ggplot(data, aes(x = var2, y = var1)) +     geom_boxplot() 
+ ggplot(data, aes(x = 1, y = var1)) +     geom_boxplot()
+#Density plots
+ ggplot(data, aes(x = var1)) +     geom_boxplot() 
+ ggplot(data, aes(x = var1, fill = var2)) +     geom_density(alpha = .3)
+
+#---------------------------------------------------------------------
+
+Spam and num_char
+
+Is there an association between spam and the length of an email? You could imagine a story either way:
+
+    Spam is more likely to be a short message tempting me to click on a link, or
+    My normal email is likely shorter since I exchange brief emails with my friends all the time.
+
+Here, you'll use the email dataset to settle that question. Begin by bringing up the help file and learning about all the variables with ?email.
+
+As you explore the association between spam and the length of an email, use this opportunity to try out linking a dplyr chain with the layers in a ggplot2 object.
+
+# Load packages
+library(ggplot2)
+library(dplyr)
+library(openintro)
+
+# Compute summary statistics
+email %>%
+  group_by(spam) %>%
+  summarize(median(num_char), IQR(num_char))
+
+# Create plot
+email %>%
+  mutate(log_num_char = log(num_char)) %>%
+  ggplot(aes(x = spam, y = log_num_char)) +
+  geom_boxplot()
+
+#---------------------------------------------------------------------
+
+Spam and !!!
+
+Let's look at a more obvious indicator of spam: exclamation marks. exclaim_mess contains the number of exclamation marks in each message. Using summary statistics and visualization, see if there is a relationship between this variable and whether or not a message is spam.
+
+Experiment with different types of plots until you find one that is the most informative. Recall that you've seen:
+
+    Side-by-side box plots
+    Faceted histograms
+    Overlaid density plots
+
+# Compute center and spread for exclaim_mess by spam
+email %>%
+  group_by(spam) %>%
+  summarize(median(exclaim_mess),
+            IQR(exclaim_mess))
+
+# Create plot for spam and exclaim_mess
+#Histograms
+ggplot(email, aes(x = log(exclaim_mess))) +
+  geom_histogram() +
+  facet_wrap(~spam)
+#Boxplots
+ggplot(email, aes(x = spam, y = log(exclaim_mess))) +
+  geom_boxplot() 
+
+#Density plots
+ggplot(email, aes(x = spam, fill = exclaim_mess)) +
+  geom_density(alpha = .3)
+
+#---------------------------------------------------------------------
+
+Collapsing levels
+
+If it was difficult to work with the heavy skew of exclaim_mess, the number of images attached to each email (image) poses even more of a challenge. Run the following code at the console to get a sense of its distribution:
+
+table(email$image)
+
+Recall that this tabulates the number of cases in each category (so there were 3811 emails with 0 images, for example). Given the very low counts at the higher number of images, let's collapse image into a categorical variable that indicates whether or not the email had at least one image. In this exercise, you'll create this new variable and explore its association with spam.
+
+# Create plot of proportion of spam by image
+email %>%
+  mutate(has_image = image > 0) %>%
+  ggplot(aes(x = has_image, fill = spam)) +
+  geom_bar(position = "fill")
+
+#---------------------------------------------------------------------
+
+Data Integrity
+
+In the process of exploring a dataset, you'll sometimes come across something that will lead you to question how the data were compiled. For example, the variable num_char contains the number of characters in the email, in thousands, so it could take decimal values, but it certainly shouldn't take negative values.
+
+You can formulate a test to ensure this variable is behaving as we expect:
+
+email$num_char < 0
+
+If you run this code at the console, you'll get a long vector of logical values indicating for each case in the dataset whether that condition is TRUE. Here, the first 1000 values all appear to be FALSE. To verify that all of the cases indeed have non-negative values for num_char, we can take the sum of this vector:
+
+# Test if images count as attachments
+email$image > 0
+sum(email$image > 0)
+
+email$attach > 0
+sum(email$attach > 0)
+
+sum(email$image > email$attach)
+
+#---------------------------------------------------------------------
+
+Answering questions with chains
+
+When you have a specific question about a dataset, you can find your way to an answer by carefully constructing the appropriate chain of R code. For example, consider the following question:
+
+    "Within non-spam emails, is the typical length of emails shorter for those that were sent to multiple people?"
+
+This can be answered with the following chain:
+
+email %>%
+   filter(spam == "not-spam") %>%
+   group_by(to_multiple) %>%
+   summarize(median(num_char))
+
+The code makes it clear that you are using num_char to measure the length of an email and median() as the measure of what is typical. If you run this code, you'll learn that the answer to the question is "yes": the typical length of non-spam sent to multiple people is a bit lower than those sent to only one person.
+
+This chain concluded with summary statistics, but others might end in a plot; it all depends on the question that you're trying to answer.
+
+# Question 1
+email %>%
+  filter(dollar > 0) %>%
+  group_by(spam) %>%
+  summarize(median(dollar))
+
+# Question 2
+email %>%
+  filter(dollar > 10) %>%
+  ggplot(aes(x = spam)) +
+  geom_bar()
+
+#---------------------------------------------------------------------
+
+What's in a number?
+
+Turn your attention to the variable called number. Read more about it by pulling up the help file with ?email.
+
+To explore the association between this variable and spam, select and construct an informative plot. For illustrating relationships between categorical variables, you've seen
+
+    Faceted barcharts
+    Side-by-side barcharts
+    Stacked and normalized barcharts.
+
+Let's practice constructing a faceted barchart.
+
+# Reorder levels
+email$number_reordered <- factor(email$number, levels = c("none", "small", "big")) 
+
+# Construct plot of number_reordered
+ggplot(email, aes(x = number_reordered))+
+  geom_bar()
+  facet_wrap(~spam)
+  
+END
