@@ -162,3 +162,23 @@ SELECT * FROM core.sales;
 SELECT * FROM core.dim_payment;
 
 SELECT * FROM public.sales
+
+----- create indexes
+
+CREATE INDEX index_name on table_name [using method]
+    (
+    column_name [ASC | DESC],
+    ...
+    );
+
+---
+
+DROP INDEX core.customer_id_index
+
+SELECT * from core.sales
+WHERE customer_id = 4; 
+
+CREATE INDEX customer_id_index on core.sales
+    (
+    customer_id ASC
+    );
